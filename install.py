@@ -1,12 +1,15 @@
-"""Installs this repo's skills and tools into a project checkout. Safe to run again.
+"""Installs this repo's tooling into a project checkout. Safe to run again.
 
     python install.py <checkout>
 
-- skills/<name> is linked as <checkout>/.claude/skills/<name>
-- tools/<name> is linked as <checkout>/.claude/<name>, and its settings.json (hooks, permissions) is merged into
-  <checkout>/.claude/settings.json
-- tools/<name>/git-hooks/* are copied into the checkout's git hooks
-- every link, and any .claude/*-state.json file, is kept out of the checkout's git
+- skills/<name>   -> <checkout>/.claude/skills/<name>
+- agents/         -> <checkout>/.claude/agents
+- shared/         -> <checkout>/.claude/shared
+- tools/<name>    -> <checkout>/.claude/<name>, its settings.json merged into .claude/settings.json and its git-hooks/
+                     copied into the checkout's git hooks
+- docs/           -> <checkout>/docs
+
+Every link is kept out of the checkout's git. A real folder already at a link's place is left alone and reported.
 """
 import json
 import os
@@ -18,19 +21,22 @@ REPO = pathlib.Path(__file__).resolve().parent
 
 
 def link(path, target):
+    """Links path to target. Returns False when a real folder or file is in the way."""
     if path.exists() and path.resolve() == target:
         print(f"ok      {path}")
-        return
+        return True
     if path.is_symlink() or path.is_junction():
         path.unlink()
     elif path.exists():
-        sys.exit(f"{path} exists and is not a link. Move it away, then run this again.")
+        print(f"skipped {path}: a real folder is there. Move what it holds into {target}, delete it, run again.")
+        return False
     path.parent.mkdir(parents=True, exist_ok=True)
     if os.name == "nt":
         subprocess.run(["cmd", "/c", "mklink", "/J", str(path), str(target)], check=True, capture_output=True)
     else:
         path.symlink_to(target, target_is_directory=True)
     print(f"linked  {path}")
+    return True
 
 
 def merge_settings(settings_path, tool, fragment):
@@ -71,7 +77,7 @@ def exclude(checkout, paths):
     missing = [p for p in paths if p not in lines]
     if missing:
         path.write_text("\n".join(lines + ["# ai-tooling"] + missing) + "\n", encoding="utf-8")
-    print(f"ok      git excludes")
+    print("ok      git excludes")
 
 
 def main():
@@ -79,10 +85,14 @@ def main():
         sys.exit(__doc__)
     checkout = pathlib.Path(sys.argv[1]).resolve()
     claude = checkout / ".claude"
-    excludes = ["/.claude/*-state.json"]
+    excludes = []
     for skill in sorted(p for p in (REPO / "skills").glob("*") if p.is_dir()):
         link(claude / "skills" / skill.name, skill)
         excludes.append(f"/.claude/skills/{skill.name}")
+    for name, place in (("agents", claude / "agents"), ("shared", claude / "shared"), ("docs", checkout / "docs")):
+        if (REPO / name).is_dir():
+            link(place, REPO / name)
+            excludes.append("/" + place.relative_to(checkout).as_posix())
     for tool in sorted(p for p in (REPO / "tools").glob("*") if p.is_dir()):
         link(claude / tool.name, tool)
         excludes.append(f"/.claude/{tool.name}")
