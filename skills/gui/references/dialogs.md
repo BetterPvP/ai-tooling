@@ -35,7 +35,8 @@ screen hangs down from the header. Not interactive.
 
 The free-positioning tool. One `plain_message` as wide as the layout acts as a canvas:
 
-- Lines are a fixed 9 px apart whatever the font. Text wraps at `width - 8`. Height is `9 * lines + 8`.
+- Lines are a fixed 9 px apart whatever the font. Text wraps at `width - 8`. Height is `9 * lines + 8`. **Each line is
+  centred on its own width**, so a left-aligned layout pads every line to the full width.
 - Glyphs draw outside their line (large `ascent`, `height`, negative space) but are clipped to the body scroll
   rectangle. Pad with blank lines above and below so art on the first or last line is not cut.
 - **Every text segment can carry its own `click_event` and `hover_event`.** The hit area is each glyph's drawn

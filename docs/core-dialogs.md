@@ -39,15 +39,19 @@ sessions.open(player, DialogScreen.builder()
 
 - **Body.** Each element sits on the 9 px text line that holds its top. The compiler reaches its x with space-font
   advances and shifts it down the rest of the way with a generated font (`betterpvp:rpg/down_N`, `betterpvp:ui/down_N`).
-  Lines draw left to right, lower lines over higher ones. The body gets enough lines for the lowest element.
+  Lines draw left to right, lower lines over higher ones. The body gets enough lines for the lowest element. The
+  client centres every line of a `plain_message`, so each line is padded to the full canvas width.
 - **Backdrop.** Compiled into the title with zero net advance and no shadow, so the client draws it from 15 px left of
   the screen centre. The title is never clipped. Backdrop art carries its height in its glyph ascent: the title sits
-  56 px above the first body line, so art whose top meets the body top has ascent `7 - 56`.
+  54 px above the first body line (measured in game), so art whose top meets the body top has ascent `7 - 54`.
 - **Clicks.** Every send gives the screen a new id. Regions and buttons get the custom click key
   `betterpvp:dialog/<id>/<slot>`, and `PlayerCustomClickEvent` routes it to the callback. Keys from an older send are
   ignored. Body text clicks carry no inputs. Native buttons carry every field.
 - **Re-render.** `rerender` sends the screen again with the last input values as initial values. Clicks keep the screen
-  open (`after_action: none`), and the exit button closes it after its own callback.
+  open (`after_action: none`), and the exit button closes it after its own callback. After any click the screen
+  re-renders unless the callback already re-rendered, opened another screen or closed it.
+- **Background clicks.** Clicking the body focuses it and the client outlines it in white. The whole body carries a
+  background click, so any click re-renders the screen and clears the outline.
 - **Pack.** `Resourcepack/tools/gui/`: `theme_art.py` draws theme art into `betterpvp:ui` at fixed codepoints,
   `offset_fonts.py` writes the shifted fonts, `hide_dialog_warning.py` makes the warning button invisible.
 
@@ -67,4 +71,4 @@ sessions.open(player, DialogScreen.builder()
   to the nearest line top.
 - Keep the body above the footer at the smallest target screen (480x270 at GUI scale 4). A taller body moves up and
   stops lining up with the backdrop.
-- Clicking non-clickable body text draws a white outline that no pack can restyle. The next re-render clears it.
+- The white focus outline still flashes for a round trip after a click, until the re-render arrives.
