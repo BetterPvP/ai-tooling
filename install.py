@@ -1,10 +1,11 @@
-"""Installs the pipeline into a BetterPvP checkout.
+"""Installs this repo's skills and tools into a project checkout. Safe to run again.
 
-Links the checkout's `.claude/skills/pipeline` and `.claude/pipeline` to this repo (junctions on Windows, symlinks
-elsewhere), merges the hooks and permissions from hooks.json into `.claude/settings.json`, and keeps the links out
-of git. Safe to run again.
+    python install.py <checkout>
 
-    python install.py <path to the BetterPvP checkout>
+- skills/<name> is linked as <checkout>/.claude/skills/<name>
+- tools/<name> is linked as <checkout>/.claude/<name>, and its settings.json (hooks, permissions) is merged into
+  <checkout>/.claude/settings.json
+- every link, and any .claude/*-state.json file, is kept out of the checkout's git
 """
 import json
 import os
@@ -12,12 +13,7 @@ import pathlib
 import subprocess
 import sys
 
-KIT = pathlib.Path(__file__).resolve().parent
-LINKS = {
-    pathlib.Path(".claude/skills/pipeline"): KIT / "skill",
-    pathlib.Path(".claude/pipeline"): KIT / "scripts",
-}
-EXCLUDES = ["/.claude/skills/pipeline", "/.claude/pipeline", "/.claude/pipeline-state.json"]
+REPO = pathlib.Path(__file__).resolve().parent
 
 
 def link(path, target):
@@ -33,49 +29,49 @@ def link(path, target):
         subprocess.run(["cmd", "/c", "mklink", "/J", str(path), str(target)], check=True, capture_output=True)
     else:
         path.symlink_to(target, target_is_directory=True)
-    print(f"linked  {path} -> {target}")
+    print(f"linked  {path}")
 
 
-def merge_settings(settings_path):
-    wanted = json.loads((KIT / "hooks.json").read_text(encoding="utf-8"))
+def merge_settings(settings_path, tool, fragment):
     settings = json.loads(settings_path.read_text(encoding="utf-8")) if settings_path.exists() else {}
     allow = settings.setdefault("permissions", {}).setdefault("allow", [])
-    for rule in wanted["permissions"]["allow"]:
-        if rule not in allow:
-            allow.append(rule)
+    allow += [rule for rule in fragment.get("permissions", {}).get("allow", []) if rule not in allow]
     hooks = settings.setdefault("hooks", {})
-    for event, groups in wanted["hooks"].items():
-        kept = [g for g in hooks.get(event, [])
-                if not any(".claude/pipeline/pipeline.py" in h["command"] for h in g.get("hooks", []))]
+    marker = f".claude/{tool}/"
+    for event, groups in fragment.get("hooks", {}).items():
+        kept = [g for g in hooks.get(event, []) if not any(marker in h["command"] for h in g.get("hooks", []))]
         hooks[event] = kept + groups
-    settings_path.parent.mkdir(parents=True, exist_ok=True)
     settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
-    print(f"merged  hooks into {settings_path}")
+    print(f"merged  {tool} hooks into {settings_path}")
 
 
-def exclude(checkout):
+def exclude(checkout, paths):
     common = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=checkout,
                             capture_output=True, text=True, check=True).stdout.strip()
     path = pathlib.Path(common) / "info" / "exclude"
     lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
-    missing = [e for e in EXCLUDES if e not in lines]
+    missing = [p for p in paths if p not in lines]
     if missing:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("\n".join(lines + ["# claude-pipeline"] + missing) + "\n", encoding="utf-8")
-    print(f"ok      git excludes in {path}")
+        path.write_text("\n".join(lines + ["# ai-tooling"] + missing) + "\n", encoding="utf-8")
+    print(f"ok      git excludes")
 
 
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     checkout = pathlib.Path(sys.argv[1]).resolve()
-    if not (checkout / "settings.gradle.kts").exists():
-        sys.exit(f"{checkout} does not look like the BetterPvP checkout.")
-    for rel, target in LINKS.items():
-        link(checkout / rel, target)
-    merge_settings(checkout / ".claude" / "settings.json")
-    exclude(checkout)
-    print("\nDone. Add the lines from README.md, section 'CLAUDE.md', to the checkout's CLAUDE.md.")
+    claude = checkout / ".claude"
+    excludes = ["/.claude/*-state.json"]
+    for skill in sorted(p for p in (REPO / "skills").iterdir() if p.is_dir()):
+        link(claude / "skills" / skill.name, skill)
+        excludes.append(f"/.claude/skills/{skill.name}")
+    for tool in sorted(p for p in (REPO / "tools").iterdir() if p.is_dir()):
+        link(claude / tool.name, tool)
+        excludes.append(f"/.claude/{tool.name}")
+        fragment = tool / "settings.json"
+        if fragment.exists():
+            merge_settings(claude / "settings.json", tool.name, json.loads(fragment.read_text(encoding="utf-8")))
+    exclude(checkout, excludes)
 
 
 if __name__ == "__main__":
