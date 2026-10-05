@@ -1,0 +1,120 @@
+---
+name: gui
+description: >
+  Designs and builds polished player-facing GUIs (inventory menus and dialog screens) with the user reviewing every
+  stage: theme, brief, wireframe alternatives, hi-fi mockup on a Claude Design canvas, textures, code, playtest. Owns
+  the project's visual theme and sets it up on first use. Use when the user runs /gui, asks to design, build, redesign
+  or restyle a menu, GUI, dialog or screen, asks what a screen should look like, or wants to set or change the UI
+  theme.
+---
+
+# /gui <screen>
+
+Every decision goes to the user on an AskUserQuestion card. Never pass a stage the user has not approved. When you
+show options, always show at least two real alternatives and say which one you would pick and why in one line.
+
+Read before starting: `docs/ui-theme.md` (the visual theme and its implementation map), `docs/ui-style.md` (text,
+colour of messages, lore rules), `references/surfaces.md` (what inventories and dialogs can and cannot do), and for
+any dialog `references/dialogs.md`.
+
+## 0. Theme
+
+- `docs/ui-theme.md` missing, or its Status is not Approved: run theme setup (`references/theme.md`) first, then come
+  back. The user can also ask for it on its own ("set up the theme", "change the theme").
+- Otherwise read its Design System link (`Artifact` read of `project/README.md` and `project/tokens.json`) and use it
+  for everything below. If the screen needs a component the theme lacks, design it in this pass and add it at step 8.
+
+## 1. Brief
+
+Gather, from the user and the code, and confirm in one card (Use this · Change):
+
+- What the screen is for, who opens it, from where (NPC, item, command, another menu).
+- What it shows (real data, with the largest realistic values) and what the player can do.
+- Live data that changes while it is open.
+- Surface: inventory, dialog, or both chained. If the user named one, that is the surface, even when another seems
+  easier. Otherwise recommend one from `references/surfaces.md` and say why. Dialogs are the first choice for
+  composed, full-screen screens: the dialog canvas library (`docs/core-dialogs.md`) places art and click regions
+  anywhere, which inventories cannot.
+
+If the screen exists, read its code and show what it looks like now (ask the user for a screenshot).
+
+## 2. References (only when the user has no picture in mind)
+
+Find 4 to 6 real examples of comparable screens (other servers, games, Dribbble or Pinterest game UI) with WebSearch,
+and open the best in the browser pane. Group them into 2 or 3 directions, name each, and ask which to follow. Do not
+copy another server's art. Use references for layout and feel only.
+
+## Designing a dialog
+
+Every dialog design, from the first wireframe, is built only from what the dialog canvas can draw. Check each layout
+against this list before showing it, and mark on the canvas which kind each interactive element is.
+
+- **Click targets** are of two kinds. Canvas regions: art or text placed anywhere on the body canvas, each with its own
+  click and tooltip. Their hit area is the drawn glyphs, so a button is an art glyph plus its label, both clickable.
+  Native buttons: 20 px tall, only in the footer (the exit button) or in a grid below the canvas. Prefer canvas regions
+  for tabs, cards, slots and in-panel buttons. Use native buttons for close, back and confirm bars.
+- **Hover** shows only as a tooltip on any region or button, the hand cursor over clickable text, and the global
+  highlight on native buttons. Never design art that changes on hover. Selected states are fine: a click re-renders
+  the screen with different art.
+- **Size**: the body canvas fits 480x270 (GUI scale 4 at 1080p). The body starts 63 px down and the footer is 33 px,
+  so keep the canvas at most about 300 px wide and 165 px tall unless the user picks shader scaling.
+- **Backdrop** art (panels, frames, the hero image) goes in the title, behind the canvas, and is never clipped. It is
+  not clickable.
+- **Inputs** (text, toggles, sliders, choices) sit below the canvas, in a column. They cannot go inside the art.
+- **Text** leaves room for the longest translation (German and Russian run about 30% longer), since an element wider
+  than the canvas fails. Arabic and CJK text snaps to 9 px rows.
+- **Live values** update by re-sending the screen, which resets scroll. Design screens that do not scroll.
+- **Draw order**: each 9 px row draws left to right and lower rows draw over higher ones. Put overlapping art where
+  that order works.
+
+## 3. Wireframes
+
+Create one Claude Design canvas per screen (Design type, title `GUI: <screen>`), following `references/mockups.md`.
+Draw 2 or 3 low-fidelity layouts that differ in structure, not colour: what is primary, where navigation lives, how
+much fits. Grey boxes, real labels, real data, true game scale. For a dialog, every alternative follows "Designing a
+dialog" above. Ask the user to pick or mix, and invite comments on the
+canvas. Read canvas comments before every revision.
+
+## 4. Hi-fi mockup
+
+Add a hi-fi artboard of the chosen layout in the theme: tokens, real pack textures uploaded as assets, the pixel font,
+hover and pressed states (for dialogs, the tooltip and native highlight states only), an empty state and the
+largest-data state. Add an artboard per state that matters (a locked
+item, an error, a second tab). Loop with the user (Approve · Change) until approved. Keep rejected versions on the
+canvas under a "Rejected" note so the history stays visible.
+
+## 5. Asset plan
+
+List every texture and glyph the screen needs, marking which exist already (search the pack first) and which are new.
+For new art:
+
+- Draw it with a reusable generator in `Resourcepack/tools/gui/` (Python, Pillow) driven by the theme tokens, so
+  panels, buttons and frames stay consistent. Extend an existing generator before writing a new one.
+- Render a composite preview PNG at game scale (the mockup rebuilt from the real textures) and show it with
+  SendUserFile next to the hi-fi artboard. Ask: Approve · Change.
+
+Before committing to a dialog technique not yet proven in game, run the spike in `references/dialogs.md`.
+
+## 6. Implement
+
+- Code follows the house rules and the menu patterns in `references/surfaces.md`. Dialogs use the dialog canvas
+  library (`DialogScreen`, `DialogCanvas`, `DialogSessions`), with art from `Resourcepack/tools/gui/theme_art.py`. Text goes through `Translations`
+  in all 12 locales and follows `docs/ui-style.md`.
+- Textures and their glyphs go in the resource pack, never Nexo (`references/surfaces.md`). Rebuild the pack with
+  `pack_processor.py`.
+- Compile, then `./gradlew shadowJar`.
+
+## 7. Playtest
+
+Ask: Deploy to ClansTest-1 · I will test it myself · Not yet. Never test in game yourself. Ask the user for a
+screenshot at GUI scale 2 and 3 and compare it with the approved mockup. List every visible difference, fix the ones
+the user picks, repeat.
+
+## 8. Record
+
+- New or changed components (a button style, a tab strip, a list row) go into the Design System with a preview, and
+  into the implementation map in `docs/ui-theme.md` (texture path, glyph id, Java helper).
+- A rule the user stated during review ("never more than two accent colours in one screen") goes into the theme
+  README and `docs/ui-theme.md`.
+- Commit `docs/ui-theme.md` and any skill changes in ai-tooling. Commit plugin and pack changes to their active
+  branches. Open a PR only when the user asks.

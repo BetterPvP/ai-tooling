@@ -1,0 +1,70 @@
+# Core: dialog canvas
+
+Status: Draft · Last verified: 2026-10-05, 85eaeca4e
+
+## Purpose
+
+`core/menu/dialog/` builds full-screen custom screens out of vanilla server dialogs. A feature places art, text and
+click regions at any position in GUI pixels, and the library turns that into the dialog title and one body text block.
+How the client lays dialogs out, and what it cannot do, is in the `/gui` skill's `references/dialogs.md`.
+
+## Main types
+
+| Type | Role |
+| --- | --- |
+| `DialogScreen` | One screen: a backdrop canvas, the body canvas, fields, grid buttons, the footer exit button |
+| `DialogCanvas` | Absolute layout. `text`, `art` and `place` return a `CanvasElement` that takes a tooltip and a click |
+| `DialogField` | Inputs: `Text`, `Toggle`, `Slider`, `Choice` |
+| `DialogButton` | A native button. Its label can be glyph art |
+| `DialogSessions` | Opens screens, routes clicks, re-renders with typed values kept |
+| `DialogCompiler` | Canvas to components, package-private |
+| `VerticalOffsets` | Maps a font and a 0 to 8 px shift to its generated copy |
+
+```java
+final DialogCanvas canvas = new DialogCanvas(300);
+canvas.art(8, 22, '', 64, 18).tooltip(tooltip).onClick((player, inputs) -> select(player, 0));
+canvas.text(14, 27, name).onClick((player, inputs) -> select(player, 0));
+
+sessions.open(player, DialogScreen.builder()
+        .name(title)
+        .backdrop(backdrop)
+        .canvas(canvas)
+        .exit(DialogButton.builder().label(closeArt).width(40).build())
+        .build());
+```
+
+`DialogTestCommand` (`/dialogtest`, staff) is a complete example.
+
+## How it works
+
+- **Body.** Each element sits on the 9 px text line that holds its top. The compiler reaches its x with space-font
+  advances and shifts it down the rest of the way with a generated font (`betterpvp:rpg/down_N`, `betterpvp:ui/down_N`).
+  Lines draw left to right, lower lines over higher ones. The body gets enough lines for the lowest element.
+- **Backdrop.** Compiled into the title with zero net advance and no shadow, so the client draws it from 15 px left of
+  the screen centre. The title is never clipped. Backdrop art carries its height in its glyph ascent: the title sits
+  56 px above the first body line, so art whose top meets the body top has ascent `7 - 56`.
+- **Clicks.** Every send gives the screen a new id. Regions and buttons get the custom click key
+  `betterpvp:dialog/<id>/<slot>`, and `PlayerCustomClickEvent` routes it to the callback. Keys from an older send are
+  ignored. Body text clicks carry no inputs. Native buttons carry every field.
+- **Re-render.** `rerender` sends the screen again with the last input values as initial values. Clicks keep the screen
+  open (`after_action: none`), and the exit button closes it after its own callback.
+- **Pack.** `Resourcepack/tools/gui/`: `theme_art.py` draws theme art into `betterpvp:ui` at fixed codepoints,
+  `offset_fonts.py` writes the shifted fonts, `hide_dialog_warning.py` makes the warning button invisible.
+
+## Extending it
+
+- New art: add an entry with a new codepoint to `theme_art.py`, run it, then `offset_fonts.py`. Never move an
+  existing codepoint.
+- A new shiftable font: add it to `VerticalOffsets` and to `FONTS` in `offset_fonts.py`.
+- Translated text: render it for the viewer before placing it, or it measures as zero.
+
+## Gotchas
+
+- `art` takes the image size. The advance is one pixel more, which the canvas adds.
+- Placement throws when an element does not fit the canvas or uses a font without shifted copies below a line top.
+  Long translations can trip the fit check, so leave room.
+- Arabic, Chinese, Japanese and Korean come from the vanilla fallback, which cannot be shifted. Text holding them snaps
+  to the nearest line top.
+- Keep the body above the footer at the smallest target screen (480x270 at GUI scale 4). A taller body moves up and
+  stops lining up with the backdrop.
+- Clicking non-clickable body text draws a white outline that no pack can restyle. The next re-render clears it.

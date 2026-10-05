@@ -15,7 +15,8 @@
   a binary you control. Split long classes by responsibility.
 - **Stores, orchestration and transfer go behind an interface** bound in a Guice module. No registries or config keys
   choosing an implementation.
-- **Inline literals** used in fewer than 3 places. Font keys are always inline.
+- **Inline literals** used in fewer than 3 places. Font keys are always inline, except menu text, which
+  always uses `Resources.Font.UI`.
 - **No loops over throwaway arrays** (`for (x : new double[]{a, b})`).
 - **Leave shared listeners alone.** Make new code compatible through Bukkit events instead of editing an existing one.
 - **Don't build on `PlayerDelayedActionEvent`**. It is being retired. Own the controller, tick and interrupts.

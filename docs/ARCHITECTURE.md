@@ -120,6 +120,7 @@ skin loads, and keeps the old head while a refresh runs. Key any memo on the exa
 | `CONTEXT.md`, `<module>/CONTEXT.md` | Domain language and lifecycles |
 | `docs/core-item-access.md` | Item capability gating by scope |
 | `docs/core-cutscenes.md` | Camera and dialogue cutscenes |
+| `docs/core-dialogs.md` | Full-screen custom dialogs: the dialog canvas library |
 | `docs/core-sites.md` | Sites, instances, residency, crews, owned sites |
 | `docs/core-network.md` | Message bus, site directory, player transfer, cross-server chat |
 | `docs/clans-resource-nodes.md` | Resource-node POIs (ores, trees, fishing) authoring |
