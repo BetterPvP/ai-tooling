@@ -5,6 +5,7 @@
 - skills/<name> is linked as <checkout>/.claude/skills/<name>
 - tools/<name> is linked as <checkout>/.claude/<name>, and its settings.json (hooks, permissions) is merged into
   <checkout>/.claude/settings.json
+- tools/<name>/git-hooks/* are copied into the checkout's git hooks
 - every link, and any .claude/*-state.json file, is kept out of the checkout's git
 """
 import json
@@ -45,10 +46,24 @@ def merge_settings(settings_path, tool, fragment):
     print(f"merged  {tool} hooks into {settings_path}")
 
 
+def git_dir(checkout):
+    return pathlib.Path(subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                                       cwd=checkout, capture_output=True, text=True, check=True).stdout.strip())
+
+
+def install_git_hook(checkout, hook):
+    """Copies a hook in, unless a hook not installed by this repo is already there."""
+    target = git_dir(checkout) / "hooks" / hook.name
+    if target.exists() and "ai-tooling" not in target.read_text(encoding="utf-8", errors="ignore"):
+        print(f"skipped {target}: a hook is already there. Call {hook} from it yourself.")
+        return
+    target.write_bytes(hook.read_bytes())
+    target.chmod(0o755)
+    print(f"hooked  {target}")
+
+
 def exclude(checkout, paths):
-    common = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=checkout,
-                            capture_output=True, text=True, check=True).stdout.strip()
-    path = pathlib.Path(common) / "info" / "exclude"
+    path = git_dir(checkout) / "info" / "exclude"
     lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
     missing = [p for p in paths if p not in lines]
     if missing:
@@ -71,6 +86,8 @@ def main():
         fragment = tool / "settings.json"
         if fragment.exists():
             merge_settings(claude / "settings.json", tool.name, json.loads(fragment.read_text(encoding="utf-8")))
+        for hook in sorted((tool / "git-hooks").glob("*")):
+            install_git_hook(checkout, hook)
     exclude(checkout, excludes)
 
 
