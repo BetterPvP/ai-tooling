@@ -28,7 +28,7 @@ BASE = CONFIG["base"]
 REPO = CONFIG["repo"]
 DIFF_LIMIT = CONFIG["diff_limit"]
 SKILL = ".claude/skills/pipeline"
-# Modules whose src/test holds tooling, such as the convention checker, rather than tests
+# Modules whose src/test/java holds tooling, such as the convention checker, rather than tests
 TOOLING_DIRS = CONFIG.get("tooling_dirs", [])
 
 
@@ -100,13 +100,13 @@ def approved_in_history(cwd, issue):
 
 def is_test_path(path):
     path = "/" + path.replace("\\", "/")
-    return "/src/test/" in path and not any(f"/{d}/src/test/" in path for d in TOOLING_DIRS)
+    return "/src/test/" in path and not any(f"/{d}/src/test/java/" in path for d in TOOLING_DIRS)
 
 
 def mentions_tests(command):
     command = command.replace("\\", "/")
     for d in TOOLING_DIRS:
-        command = command.replace(f"{d}/src/test", "")
+        command = command.replace(f"{d}/src/test/java", "")
     return "src/test" in command
 
 
