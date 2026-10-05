@@ -1,6 +1,11 @@
 # AI tooling
 
-Claude Code skills and tools for BetterPvP, shared across machines and the team.
+Claude Code tooling and system docs for BetterPvP, shared across machines and the team.
+
+![Delivery flow](delivery-flow.png)
+
+The editable diagram is at https://draw.brauw.dev/editor/1402245d-a973-49f7-b884-d83ee368f510. Update
+`delivery-flow.png` with an export when it changes.
 
 ## Install
 
@@ -11,14 +16,25 @@ git clone https://github.com/BetterPvP/ai-tooling.git
 python ai-tooling/install.py <path to the BetterPvP checkout>
 ```
 
-This links everything into the checkout's `.claude/` folder, adds the hooks to `.claude/settings.json`, and keeps
-it all out of the checkout's git. Run it again after pulling.
+This links everything into the checkout and keeps it out of the checkout's git. Run it again after pulling. Then make
+sure the checkout's `CLAUDE.md` imports the house rules with the line `@.claude/shared/house-rules.md`.
 
 ## Layout
 
 | Folder | Becomes | Holds |
 |---|---|---|
-| `skills/<name>/` | `.claude/skills/<name>` | a skill, with `SKILL.md` at its root |
-| `tools/<name>/` | `.claude/<name>` | scripts, plus an optional `settings.json` (Claude hooks, permissions) and `git-hooks/` |
+| `skills/<name>/` | `.claude/skills/<name>` | `/slice`, `/build`, `/doc`, `/cleanup`, and the project skills |
+| `agents/` | `.claude/agents` | `slop-reviewer`, `implementer`, and the project agents |
+| `shared/` | `.claude/shared` | house rules, slop checklist, doc templates, `project.json`, `board.py`, `deploy.py` |
+| `tools/<name>/` | `.claude/<name>` | scripts, plus an optional `settings.json` (Claude hooks) and `git-hooks/` |
+| `docs/` | `docs/` | the system docs |
 
-Edits made in the checkout's `.claude/` land in this repo. Commit them here.
+Edits made through the checkout land in this repo. Commit them here.
+
+## Config
+
+`shared/project.json` sets the repo, the base branch (change `base` when the season branch changes), the PR size
+limit, the board and its status ids, and the projects to take new issues off.
+
+For deploys, set `PTERODACTYL_API_KEY`, or sign in to the 1Password CLI with access to
+`op://Claude/pterodactyl-betterpvp/credential`.
