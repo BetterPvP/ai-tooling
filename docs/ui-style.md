@@ -79,11 +79,11 @@ Every message picks the one channel that fits how long it matters and how often 
 | --- | --- | --- | --- | --- |
 | System | Staff commands, command usage and errors, server and moderation state | Blue `Name> ` | None | None |
 | Feedback | The result of something the player just did: a menu click, a blueprint, a deposit | None. Green when done, red when refused | None | None |
-| Alert | Something happened in the player's clan or camp that they did not cause | None | `bell_icon` for news, `exclamation_mark_icon` for problems | None |
-| Tip | Tutorial nudges and first-time hints | None | `info_icon` | One above and one below |
+| Alert | Something happened in the player's clan or camp that they did not cause | None | `bell` for news, `exclamation_mark` for problems | None |
+| Tip | Tutorial nudges and first-time hints | None | `info` | One above and one below |
 | Summary | A block of related lines sent together, such as camp arrival notices | None | Per line, by severity | One above and one below the block |
 
-The blue prefix is only for definitive system messages. Everything a player sees during normal play goes without it. Leading icons are sprites from `betterpvp:menu/icon/regular/`.
+The blue prefix is only for definitive system messages. Everything a player sees during normal play goes without it. Leading icons are `ChatIcon` sprites on the vanilla `gui` atlas, from `assets/betterpvp/textures/gui/sprites/icon/chat/`. That atlas loads every `gui/sprites` folder without an atlas file, so pack mergers cannot drop it. Do not draw chat icons from the `blocks` atlas.
 
 ```
 System     Settlers> Added Aldric to Samito's camp.
