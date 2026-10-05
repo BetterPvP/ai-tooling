@@ -80,10 +80,10 @@ def main():
     checkout = pathlib.Path(sys.argv[1]).resolve()
     claude = checkout / ".claude"
     excludes = ["/.claude/*-state.json"]
-    for skill in sorted(p for p in (REPO / "skills").iterdir() if p.is_dir()):
+    for skill in sorted(p for p in (REPO / "skills").glob("*") if p.is_dir()):
         link(claude / "skills" / skill.name, skill)
         excludes.append(f"/.claude/skills/{skill.name}")
-    for tool in sorted(p for p in (REPO / "tools").iterdir() if p.is_dir()):
+    for tool in sorted(p for p in (REPO / "tools").glob("*") if p.is_dir()):
         link(claude / tool.name, tool)
         excludes.append(f"/.claude/{tool.name}")
         fragment = tool / "settings.json"

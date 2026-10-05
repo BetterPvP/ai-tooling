@@ -22,9 +22,3 @@ it all out of the checkout's git. Run it again after pulling.
 | `tools/<name>/` | `.claude/<name>` | scripts, plus an optional `settings.json` (Claude hooks, permissions) and `git-hooks/` |
 
 Edits made in the checkout's `.claude/` land in this repo. Commit them here.
-
-## What's here
-
-- **pipeline**: the delivery pipeline. Start it with `/pipeline` in Claude Code. See
-  [tools/pipeline/README.md](tools/pipeline/README.md) for its setup.
-- **review**: an AI review comment on every pipeline PR. See [tools/review/README.md](tools/review/README.md).
