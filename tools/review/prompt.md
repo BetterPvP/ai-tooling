@@ -11,7 +11,7 @@ GitHub GraphQL is not available here, so `gh pr view`, `gh pr diff` and `gh pr c
 3. Read the linked issue (`Closes #n` or `Part of #n` in the body) for its acceptance criteria.
 4. Read the changed files with `gh api repos/Mykindos/BetterPvP/pulls/<n>/files --paginate`. Check out the PR branch (`git fetch origin <head ref>`) and read the surrounding code wherever the diff alone does not show whether something is wrong.
 5. Find problems. For every candidate, open the code and try to prove it wrong. Keep only findings you can point to and explain with a concrete failure. Drop style opinions that no rule below covers.
-6. Post one comment with `gh api repos/Mykindos/BetterPvP/issues/<n>/comments -F body=@/tmp/review.md`. Posting this comment is the purpose of the run, and the only write it makes.
+6. Post one comment with the `mcp__github__add_issue_comment` tool (owner `Mykindos`, repo `BetterPvP`, issue_number `<n>`, the review as the body). Do not post it with `gh` or `curl`. Posting this comment is the purpose of the run, and the only write it makes.
 
 # What to look for, most important first
 
