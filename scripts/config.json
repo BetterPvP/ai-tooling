@@ -1,0 +1,13 @@
+{
+  "repo": "mykindos/BetterPvP",
+  "base": "camps",
+  "diff_limit": 400,
+  "board": {
+    "owner": "Mykindos",
+    "number": 2,
+    "id": "PVT_kwHOAFI-eM4Ar-za",
+    "status_field": "PVTSSF_lAHOAFI-eM4Ar-zazgi-tlk",
+    "status_todo": "61e4505c"
+  },
+  "remove_from_projects": [1]
+}
