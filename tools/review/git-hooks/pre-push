@@ -1,5 +1,0 @@
-#!/bin/sh
-# ai-tooling: requests an AI review of the pushed branch's open PR. Never blocks the push.
-main_checkout="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"
-python "$main_checkout/.claude/review/fire.py" --push || true
-exit 0

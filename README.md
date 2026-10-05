@@ -27,4 +27,4 @@ Edits made in the checkout's `.claude/` land in this repo. Commit them here.
 
 - **pipeline**: the delivery pipeline. Start it with `/pipeline` in Claude Code. See
   [tools/pipeline/README.md](tools/pipeline/README.md) for its setup.
-- **review**: an AI review comment on every push to a PR. See [tools/review/README.md](tools/review/README.md).
+- **review**: an AI review comment on every pipeline PR. See [tools/review/README.md](tools/review/README.md).

@@ -12,21 +12,8 @@ impossible, stop and tell the user why. They can reply `unlock tests`.
 5. Check the size: `python .claude/pipeline/pipeline.py status` warns past 400 non-test lines.
 6. Run the `convention-reviewer` agent on the branch and fix what it finds.
 7. Commit and push the branch. CI only runs on PRs, so ask the user to open one unless they already said to. Open it
-   against `<base>` with the `commit-and-pr` skill, adding this to its body:
-
-   ```
-   Closes #<issue>
-
-   ## Acceptance criteria
-   | AC | Checked by |
-   |---|---|
-   | AC1 | `BuilderTest#ac1_...` |
-
-   ## Playtest
-   - [ ] AC2 [play] ...
-
-   - [ ] Docs updated
-   - [ ] Translations in all 12 locales
-   ```
+   against `<base>` with the `commit-and-pr` skill and the `pipeline` label (`--label pipeline`), which starts the
+   AI review. Fill in the repo's PR template: `Closes #<issue>`, the acceptance criteria table with the test that
+   checks each `[auto]` AC, and a playtest checkbox for each `[play]` AC.
 
 8. Move the card to In review with the `backlog` skill.
