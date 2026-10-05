@@ -43,7 +43,9 @@ with `core/tools/pack_font_advances.py` whenever `rpg.json` or its textures chan
 | surface-3 | `#2C3244` | Raised rows, hover ground |
 | bevel-hi / bevel-lo | `#3A4258` / `#161A24` | Panel bevel |
 | ink / ink-muted / ink-disabled | `#EEF0F5` / `#A3AABD` / `#6B7183` | Text |
-| steel / steel-hi / steel-lo | `#B9C0CE` / `#EEF1F6` / `#7C8497` | Normal button |
+| steel / steel-hi / steel-lo | `#5C6375` / `#838B9E` / `#343946` | Normal button, light text on it |
+| steel-hover | `#6E768A` | Hovered normal button |
+| tag-ink | `#14161D` | Text on tags |
 | accent / accent-hi / accent-lo | `#F2B33D` / `#FFE6A0` / `#C2611A` | Gold |
 | accent-title | `#FFD36B` | Titles and item names |
 | arcane / arcane-hi / arcane-lo | `#A77BFF` / `#D9C6FF` / `#6A3FD0` | Magic content |
@@ -61,13 +63,19 @@ and list them here.
 
 | Component | Texture | Font and codepoint | Code |
 | --- | --- | --- | --- |
-| Panel | not built | | |
-| Button | not built | | |
+| Panel | `textures/font/ui/dialog_test_panel_*.png` (test only) | `betterpvp:ui` `U+E000`, `U+E001` | `DialogCanvas` backdrop |
+| Button, gold | `textures/font/ui/button_gold.png`, `button_gold_pressed.png` | `betterpvp:ui` `U+E004`, `U+E007` | `CanvasElement.pressed` |
+| Button, hover rim | `textures/font/ui/dialog_test_confirm_hover.png` (per position) | `betterpvp:ui` `U+E008` | `CanvasElement.hover` |
+| Button, steel (canvas) | `textures/font/ui/button_steel.png` | `betterpvp:ui` `U+E005` | `DialogCanvas.art` |
+| Button, native | `minecraft:textures/gui/sprites/widget/button*.png` | | `DialogButton` |
 | Slot | not built | | |
 | Tooltip | not built | | |
 | Tag | not built | | |
+| Tab | `textures/font/ui/tab.png`, `tab_selected.png` (not in the Design System yet) | `betterpvp:ui` `U+E002`, `U+E003` | `DialogCanvas.art` |
 | List row | not built | | |
 | Progress bar | not built | | |
+
+All art is drawn by `Resourcepack/tools/gui/theme_art.py`. Codepoints are fixed. `U+E006` is retired.
 
 ## Screens
 
