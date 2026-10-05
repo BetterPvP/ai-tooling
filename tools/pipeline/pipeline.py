@@ -28,6 +28,8 @@ BASE = CONFIG["base"]
 REPO = CONFIG["repo"]
 DIFF_LIMIT = CONFIG["diff_limit"]
 SKILL = ".claude/skills/pipeline"
+# Modules whose src/test holds tooling, such as the convention checker, rather than tests
+TOOLING_DIRS = CONFIG.get("tooling_dirs", [])
 
 
 def main_checkout():
@@ -96,6 +98,18 @@ def approved_in_history(cwd, issue):
     return bool(approved) and run(["git", "merge-base", "--is-ancestor", approved, "HEAD"], cwd) is not None
 
 
+def is_test_path(path):
+    path = "/" + path.replace("\\", "/")
+    return "/src/test/" in path and not any(f"/{d}/src/test/" in path for d in TOOLING_DIRS)
+
+
+def mentions_tests(command):
+    command = command.replace("\\", "/")
+    for d in TOOLING_DIRS:
+        command = command.replace(f"{d}/src/test", "")
+    return "src/test" in command
+
+
 def tests_locked(cwd):
     """True once this issue's tests, or the earlier issue its body names with `Tests: #n`, are approved."""
     _, issue = branch_issue(cwd)
@@ -109,7 +123,7 @@ def non_test_lines(cwd, base):
     total = 0
     for line in (run(["git", "diff", "--numstat", base], cwd) or "").splitlines():
         added, removed, path = (line.split("\t") + ["", ""])[:3]
-        if "/src/test/" in path or "/translations/" in path or not added.isdigit():
+        if is_test_path(path) or "/translations/" in path or not added.isdigit():
             continue
         total += int(added) + int(removed)
     return total
@@ -289,7 +303,7 @@ def guard(payload):
         path = str(args.get("file_path") or args.get("notebook_path") or "").replace("\\", "/")
         if path.endswith("/.claude/pipeline-state.json"):
             emit("PreToolUse", deny="Approvals are recorded only with pipeline.py approve-tests, after the user approves.")
-        elif "/src/test/" in path and tests_locked(cwd):
+        elif is_test_path(path) and tests_locked(cwd):
             emit("PreToolUse", deny="Tests are locked after the user approved them. If a test is wrong, stop and "
                                     "tell the user why. If they agree, record it with pipeline.py unlock-tests.")
     elif tool in SHELL_TOOLS:
@@ -301,7 +315,7 @@ def guard(payload):
                                     "on the right board.")
         elif "pipeline-state.json" in command:
             emit("PreToolUse", deny="Approvals are recorded only with pipeline.py approve-tests, after the user approves.")
-        elif "src/test" in command.replace("\\", "/") and SHELL_WRITES.search(command) and tests_locked(cwd):
+        elif mentions_tests(command) and SHELL_WRITES.search(command) and tests_locked(cwd):
             emit("PreToolUse", deny="Tests are locked after the user approved them. If a test is wrong, stop and "
                                     "tell the user why. If they agree, record it with pipeline.py unlock-tests.")
 

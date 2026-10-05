@@ -9,5 +9,10 @@
     "status_field": "PVTSSF_lAHOAFI-eM4Ar-zazgi-tlk",
     "status_todo": "61e4505c"
   },
-  "remove_from_projects": [1]
+  "remove_from_projects": [
+    1
+  ],
+  "tooling_dirs": [
+    "conventions"
+  ]
 }
