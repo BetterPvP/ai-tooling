@@ -10,6 +10,7 @@ hooks: the session-start report and the guard that locks tests during implementa
     python .claude/pipeline/pipeline.py unlock-tests    record the user's agreement to change approved tests
     python .claude/pipeline/pipeline.py guard           PreToolUse hook
     python .claude/pipeline/pipeline.py file-issue --title T --body-file F [--label L ...]
+    python .claude/pipeline/pipeline.py tidy <number>   take an issue or PR off the auto-adding projects
 
 The base branch, repo and board live in config.json next to this file.
 """
@@ -347,23 +348,30 @@ def file_issue(argv):
     else:
         print(f"Could not add #{number} to project {board['number']}. Add it with the backlog skill.")
 
+    tidy(number, cwd)
+    print(f"#{number} {url}")
+
+
+def tidy(number, cwd):
+    """Takes an issue or PR off the projects that auto-add new items. Those add it some seconds later, so this waits
+    up to a minute for them."""
     owner, name = REPO.split("/")
-    query = ("query($o:String!,$n:String!,$i:Int!){repository(owner:$o,name:$n){issue(number:$i){"
-             "projectItems(first:20){nodes{id project{number}}}}}}")
+    query = ("query($o:String!,$n:String!,$i:Int!){repository(owner:$o,name:$n){issueOrPullRequest(number:$i){"
+             "...on Issue{projectItems(first:20){nodes{id project{number}}}}"
+             "...on PullRequest{projectItems(first:20){nodes{id project{number}}}}}}}")
     pending = set(CONFIG.get("remove_from_projects", []))
-    for _ in range(10):
+    for _ in range(20):
         raw = run(["gh", "api", "graphql", "-f", f"query={query}", "-f", f"o={owner}", "-f", f"n={name}",
-                   "-F", f"i={number}", "--jq", ".data.repository.issue.projectItems.nodes"], cwd)
+                   "-F", f"i={number}", "--jq", ".data.repository.issueOrPullRequest.projectItems.nodes"], cwd)
         for node in json.loads(raw) if raw else []:
             if node["project"]["number"] in pending:
-                if run(["gh", "project", "item-delete", str(node["project"]["number"]), "--owner", board["owner"],
-                        "--id", node["id"]], cwd) is None:
+                if run(["gh", "project", "item-delete", str(node["project"]["number"]),
+                        "--owner", CONFIG["board"]["owner"], "--id", node["id"]], cwd) is None:
                     print(f"Could not remove #{number} from project {node['project']['number']}.")
                 pending.discard(node["project"]["number"])
         if not pending:
-            break
-        time.sleep(2)
-    print(f"#{number} {url}")
+            return
+        time.sleep(3)
 
 
 def main():
@@ -375,6 +383,9 @@ def main():
         return
     if mode == "file-issue":
         file_issue(sys.argv[2:])
+        return
+    if mode == "tidy":
+        tidy(int(sys.argv[2]), os.getcwd())
         return
     if mode in ("approve-tests", "unlock-tests"):
         (approve_tests if mode == "approve-tests" else unlock_tests)(os.getcwd())

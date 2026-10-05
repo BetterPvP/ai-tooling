@@ -16,4 +16,5 @@ impossible, stop and tell the user why. If they agree it must change, run `pipel
    AI review. Fill in the repo's PR template: `Closes #<issue>`, the acceptance criteria table with the test that
    checks each `[auto]` AC, and a playtest checkbox for each `[play]` AC.
 
-8. Move the card to In review with the `backlog` skill.
+8. Run `python .claude/pipeline/pipeline.py tidy <pr>` to take the PR off boards that auto-add it, then move the
+   issue's card to In review with the `backlog` skill.
