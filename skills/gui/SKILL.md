@@ -15,7 +15,8 @@ show options, always show at least two real alternatives and say which one you w
 
 Read before starting: `docs/ui-theme.md` (the visual theme and its implementation map), `docs/ui-style.md` (text,
 colour of messages, lore rules), `references/surfaces.md` (what inventories and dialogs can and cannot do), and for
-any dialog `references/dialogs.md`.
+any dialog `docs/core-gui-screens.md` (how dialog screens are built: screen files, the schema, actions, the pack
+generator) and `references/dialogs.md` (why the client limits what they can do).
 
 ## 0. Theme
 
@@ -33,8 +34,8 @@ Gather, from the user and the code, and confirm in one card (Use this · Change)
 - Live data that changes while it is open.
 - Surface: inventory, dialog, or both chained. If the user named one, that is the surface, even when another seems
   easier. Otherwise recommend one from `references/surfaces.md` and say why. Dialogs are the first choice for
-  composed, full-screen screens: the dialog canvas library (`docs/core-dialogs.md`) places art and click regions
-  anywhere, which inventories cannot.
+  composed, full-screen screens: a screen file (`docs/core-gui-screens.md`) places art and click regions anywhere,
+  which inventories cannot.
 
 If the screen exists, read its code and show what it looks like now (ask the user for a screenshot).
 
@@ -46,16 +47,21 @@ copy another server's art. Use references for layout and feel only.
 
 ## Designing a dialog
 
-Every dialog design, from the first wireframe, is built only from what the dialog canvas can draw. Check each layout
-against this list before showing it, and mark on the canvas which kind each interactive element is.
+A dialog is a screen file (`docs/core-gui-screens.md`). Every design, from the first wireframe, is built only from
+what a screen file can express. Check each layout against this list before showing it, and name on the canvas the
+element each part becomes (`button`, `repeat`, `switch` and so on).
 
-- **Click targets** are of two kinds. Canvas regions: art or text placed anywhere on the body canvas, each with its own
-  click and tooltip. Their hit area is the drawn glyphs, so a button is an art glyph plus its label, both clickable.
-  Native buttons: 20 px tall, only in the footer (the exit button) or in a grid below the canvas. Prefer canvas regions
-  for tabs, cards, slots and in-panel buttons. Use native buttons for close, back and confirm bars.
-- **Hover** shows only as a tooltip on any region or button, the hand cursor over clickable text, and the global
-  highlight on native buttons. Never design art that changes on hover. Selected states are fine: a click re-renders
-  the screen with different art.
+- **Click targets** are of two kinds. Canvas elements: `text`, `button` and `icon` anywhere on the canvas, each with
+  its own `on_click` and tooltip. Their hit area is the drawn glyphs, so a button is its art plus its label. Native
+  buttons: 20 px tall, only the footer `exit` or the `buttons` grid below the canvas. Prefer canvas buttons for tabs,
+  cards, slots and in-panel buttons. Use native buttons for close, back and confirm bars.
+- **Hover**: a canvas button can show hover art pinned over it (`"hover": "rim"` or another hover style), which
+  replaces its tooltip. Other elements show a tooltip. Native buttons use the theme's highlighted sprite. Pressed art
+  (`"pressed": true`) shows for a moment after a click.
+- **Tabs and states** are a `switch` on a state key, with buttons that `set` it. Lists are a `repeat` with a `max`.
+  Repeated parts are components (`use`).
+- **Animation**: an `icon` with `frames` and `fps` loops on the client. Anything else that changes does so by
+  re-rendering after an action.
 - **Size**: the body canvas fits 480x270 (GUI scale 4 at 1080p). The body starts 63 px down and the footer is 33 px,
   so keep the canvas at most about 300 px wide and 165 px tall unless the user picks shader scaling.
 - **Backdrop** art (panels, frames, the hero image) goes in the title, behind the canvas, and is never clipped. It is
@@ -77,11 +83,14 @@ canvas. Read canvas comments before every revision.
 
 ## 4. Hi-fi mockup
 
-Add a hi-fi artboard of the chosen layout in the theme: tokens, real pack textures uploaded as assets, the pixel font,
-hover and pressed states (for dialogs, the tooltip and native highlight states only), an empty state and the
-largest-data state. Add an artboard per state that matters (a locked
-item, an error, a second tab). Loop with the user (Approve · Change) until approved. Keep rejected versions on the
-canvas under a "Rejected" note so the history stays visible.
+- **Dialogs**: write the screen file itself, in the module's `src/main/resources/gui/`, with the chosen layout and the
+  theme's styles. Generate its preview with `build_gui.py --previews` (`docs/core-gui-screens.md`) and show it with
+  SendUserFile. The preview is the hi-fi mockup, drawn with the real art and font. Write a variant state into a copy of
+  the file to preview other states (a second tab, an error, a full list). Revise the file until approved.
+- **Inventories**: add a hi-fi artboard of the chosen layout in the theme: tokens, real pack textures uploaded as
+  assets, the pixel font, hover and pressed states, an empty state and the largest-data state.
+
+Loop with the user (Approve · Change) until approved. Keep rejected versions so the history stays visible.
 
 ## 5. Asset plan
 
@@ -90,8 +99,11 @@ For new art:
 
 - Only repeatable pipeline steps go in `Resourcepack/tools/`. A script that generates something once runs from the
   scratchpad and is not committed.
-- Draw it with a reusable generator in `Resourcepack/tools/gui/` (Python, Pillow) driven by the theme tokens, so
-  panels, buttons and frames stay consistent. Extend an existing generator before writing a new one.
+- Dialog art comes from styles, hover styles and sprites (`docs/core-gui-screens.md`, Pack generation). A new look is a
+  new built-in style in `theme_art.py` or a nine-slice PNG in `Resourcepack/gui/styles/`, never a hand-placed glyph.
+  Sprites go in `Resourcepack/gui/sprites/`.
+- Other art: draw it with a reusable generator in `Resourcepack/tools/gui/` (Python, Pillow) driven by the theme
+  tokens, so panels, buttons and frames stay consistent. Extend an existing generator before writing a new one.
 - Render a composite preview PNG at game scale (the mockup rebuilt from the real textures) and show it with
   SendUserFile next to the hi-fi artboard. Ask: Approve · Change.
 
@@ -99,9 +111,12 @@ Before committing to a dialog technique not yet proven in game, run the spike in
 
 ## 6. Implement
 
-- Code follows the house rules and the menu patterns in `references/surfaces.md`. Dialogs use the dialog canvas
-  library (`DialogScreen`, `DialogCanvas`, `DialogSessions`), with art from `Resourcepack/tools/gui/theme_art.py`.
-  Text goes through `Translations` in all 12 locales and follows `docs/ui-style.md`.
+- Code follows the house rules and the menu patterns in `references/surfaces.md`. A dialog is its approved screen
+  file plus the Java that opens it (`GuiScreens.open`) and binds its actions. Shared actions, components, element
+  types and text styles go in `GuiRegistry`. A screen built in Java declares its art in `gui/assets/*.json`. Add a
+  test that the screen loads and validates. Text goes through `Translations` in all 12 locales and follows
+  `docs/ui-style.md`.
+- Regenerate the pack art with `build_gui.py` after any screen file change, and before every deploy.
 - Textures and their glyphs go in the resource pack, never Nexo (`references/surfaces.md`). Rebuild the pack with
   `pack_processor.py`.
 - Compile, then `./gradlew shadowJar`.

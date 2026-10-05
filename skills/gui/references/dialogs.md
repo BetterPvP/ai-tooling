@@ -1,7 +1,7 @@
 # Full-screen dialogs
 
-How to build a fully custom screen out of a server dialog, from the 1.21.11 client source. Build screens with the
-dialog canvas library (`docs/core-dialogs.md`), which applies everything below. The raw research, with
+How a server dialog becomes a fully custom screen, from the 1.21.11 client source. Build screens as screen files
+(`docs/core-gui-screens.md`), which apply everything below through the dialog canvas library (`docs/core-dialogs.md`). The raw research, with
 sources and confidence tags, is in `research/`. Nothing here changes in 26.3 or 26.4 snapshot 2: the dialog codecs,
 layout and sprites are identical there.
 
@@ -74,13 +74,14 @@ back as `initial`.
 
 ## Hover feedback
 
-There is no hover event to the server and no way to swap a text segment's art on hover. What exists:
+There is no hover event to the server. What exists:
 
 - Native buttons switch to `button_highlighted` (global sprite).
 - `hover_event` tooltips on text segments and the title, `tooltip` on buttons. A tooltip can be glyph art.
 - From 1.21.9 the cursor turns into a hand over clickable segments.
-
-Design hover states as tooltips or native button frames, never as art changes.
+- Hover art pinned over an element: the hover tooltip is an item with an invisible `tooltip_style` whose name is the
+  art, and the pack's text shader moves it from the mouse onto the element using screen coordinates stored in its
+  corner pixels. Screen files do this with `"hover": "<hover style>"`. Each spot needs its own generated glyph.
 
 ## The warning button
 

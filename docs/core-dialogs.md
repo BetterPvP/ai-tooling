@@ -4,6 +4,9 @@ Status: Draft · Last verified: 2026-10-05, 85eaeca4e
 
 ## Purpose
 
+Screens are normally written as definition files on top of this library: see `docs/core-gui-screens.md`. This doc
+covers the library underneath.
+
 `core/menu/dialog/` builds full-screen custom screens out of vanilla server dialogs. A feature places art, text and
 click regions at any position in GUI pixels, and the library turns that into the dialog title and one body text block.
 How the client lays dialogs out, and what it cannot do, is in the `/gui` skill's `references/dialogs.md`.

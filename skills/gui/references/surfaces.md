@@ -50,14 +50,14 @@ Framework: vendored InvUI in `core/inventory/` plus the BetterPvP layer in `core
 
 ## Dialogs
 
-Themed dialogs use the dialog canvas library in `core/menu/dialog/` (`docs/core-dialogs.md`). Older plain dialogs
-(`NameSearchButton`, `CurrencyOfferButton`, `KitTrade`) use the Paper Dialog API directly.
+Themed dialogs are screen files (`docs/core-gui-screens.md`), run by the dialog canvas library in
+`core/menu/dialog/` (`docs/core-dialogs.md`). Older plain dialogs (`NameSearchButton`, `CurrencyOfferButton`,
+`KitTrade`) use the Paper Dialog API directly.
 
-How full-screen dialog screens work, what is verified from the client source, and the spike checklist are in
-`dialogs.md`. Read it before designing any dialog. Two rules from it shape every design:
+Why dialogs work the way they do, from the client source, is in `dialogs.md`. Two rules shape every design:
 
-- Art lives in the title (never clipped) and in wide `plain_message` canvases (clipped to the body). Clickable spots
-  are text segments with click events, or native buttons in the footer or the `multi_action` grid.
-- Hover can only show as tooltips, the hand cursor and the global button highlight. Never design an art change on hover.
+- Backdrop art lives in the title (never clipped) and the canvas in the body (clipped to it). Clickable spots are
+  canvas elements with `on_click`, or native buttons in the footer or the grid below the canvas.
+- Hover shows as hover art over canvas buttons, tooltips, the hand cursor and the global native button highlight.
 
 Validate everything again on click, because a dialog can sit open while the world changes (`KitTrade` does this).
