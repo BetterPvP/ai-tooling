@@ -103,6 +103,14 @@ are UTF-8 with CRLF line endings.
 Show and hide with `BossBar.addViewer(Player)` and `removeViewer(Player)`. Keep your own `Set<Player>` of viewers,
 because `BossBar.viewers()` returns `BossBarViewer`s, which are not `Audience`s.
 
+A gamer's `BossBarOverlay` and `BossBarQueue` are cleared when the player quits (`GamerBossBarListener`). The
+`Gamer` can outlive a quit when the player rejoins before the client unloads. Re-add per-player overlays on
+`ClientJoinEvent`, not `AsyncClientLoadEvent`, and reuse one `DisplayObject` per feature (remove, then add) so a
+double join still leaves one.
+
+`PlayerHeadProvider.head(...)` always returns a painted head. It shows a bundled question-mark head until the
+skin loads, and keeps the old head while a refresh runs. Key any memo on the exact `(scale, top)` you paint.
+
 ## Documentation map
 
 | Where | What |
