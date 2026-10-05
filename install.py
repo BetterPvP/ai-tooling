@@ -39,9 +39,12 @@ def merge_settings(settings_path, tool, fragment):
     allow += [rule for rule in fragment.get("permissions", {}).get("allow", []) if rule not in allow]
     hooks = settings.setdefault("hooks", {})
     marker = f".claude/{tool}/"
+    for event in list(hooks):
+        hooks[event] = [g for g in hooks[event] if not any(marker in h["command"] for h in g.get("hooks", []))]
+        if not hooks[event]:
+            del hooks[event]
     for event, groups in fragment.get("hooks", {}).items():
-        kept = [g for g in hooks.get(event, []) if not any(marker in h["command"] for h in g.get("hooks", []))]
-        hooks[event] = kept + groups
+        hooks[event] = hooks.get(event, []) + groups
     settings_path.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
     print(f"merged  {tool} hooks into {settings_path}")
 

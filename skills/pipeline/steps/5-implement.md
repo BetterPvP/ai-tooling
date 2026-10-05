@@ -1,7 +1,7 @@
 # Step 5: Implement
 
 Make the approved tests pass. They are locked: a hook blocks edits under `src/test/`. If a test is wrong or
-impossible, stop and tell the user why. They can reply `unlock tests`.
+impossible, stop and tell the user why. If they agree it must change, run `pipeline.py unlock-tests`.
 
 1. Write the smallest code that passes the tests and meets the `[play]` ACs. Follow `CLAUDE.md` and the module's
    `CLAUDE.md`. Check your diff against [../slop-checklist.md](../slop-checklist.md) before committing.

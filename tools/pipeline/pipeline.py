@@ -1,12 +1,13 @@
 """Delivery pipeline state for BetterPvP.
 
 Works out which pipeline step a branch is on from git and GitHub, so no session has to remember it. Also backs the
-hooks: the session-start report, the user's test approval, and the guard that locks tests during implementation.
+hooks: the session-start report and the guard that locks tests during implementation.
 
     python .claude/pipeline/pipeline.py status          print the current step
     python .claude/pipeline/pipeline.py overview        list every task in progress
     python .claude/pipeline/pipeline.py session-start   SessionStart hook
-    python .claude/pipeline/pipeline.py prompt          UserPromptSubmit hook ("approve tests", "unlock tests")
+    python .claude/pipeline/pipeline.py approve-tests   record the user's approval of the tests, locking them
+    python .claude/pipeline/pipeline.py unlock-tests    record the user's agreement to change approved tests
     python .claude/pipeline/pipeline.py guard           PreToolUse hook
     python .claude/pipeline/pipeline.py file-issue --title T --body-file F [--label L ...]
 
@@ -50,8 +51,8 @@ STEP_NAMES = {
 STEP_FILES = {1: "1-slice.md", 2: "2-spec.md", 3: "3-tests.md", 5: "5-implement.md", 6: "6-gates.md",
               8: "8-deploy.md", 11: "11-merged.md"}
 WAITING = {
-    4: "Waiting on the user to read the tests and reply \"approve tests\".",
-    9: "Waiting on the user to playtest on ClansTest-1 and tick the [play] ACs in the PR.",
+    4: "Waiting on the user to approve the tests. Ask them, and record a clear yes with approve-tests.",
+    9: "Waiting on the user to playtest on ClansTest-1. Tick each [play] AC in the PR when they report it passing.",
     10: "Waiting on the user's review and merge.",
 }
 
@@ -249,33 +250,29 @@ def session_start(payload):
          "\nThis is context only. Act on it when the user asks, following the pipeline skill.")
 
 
-def prompt(payload):
-    text = (payload.get("prompt") or "").strip().lower()
-    cwd = payload.get("cwd") or os.getcwd()
-    if not (text.startswith("approve tests") or text.startswith("unlock tests")):
-        return
+def approve_tests(cwd):
+    """Records the user's approval of the branch's latest test commit, which locks the tests."""
     _, issue = branch_issue(cwd)
     if issue is None:
-        emit("UserPromptSubmit", "The user tried to approve or unlock tests, but this branch has no issue number.")
-        return
-    state = load_state()
-    entry = state.setdefault(str(issue), {})
-    if text.startswith("unlock tests"):
-        entry.pop("tests_approved", None)
-        save_state(state)
-        emit("UserPromptSubmit", f"The user unlocked the tests for issue #{issue}. Tests may be edited again, "
-                                 "and need approving again before implementation continues.")
-        return
+        sys.exit("This branch has no issue number.")
     base = base_commit(cwd)
     tests = test_commits(cwd, base) if base else []
     if not tests:
-        emit("UserPromptSubmit", "The user said \"approve tests\", but the branch has no `test:` commit to approve. "
-                                 "Commit the tests with a `test:` message first.")
-        return
-    entry["tests_approved"] = tests[0]
+        sys.exit("The branch has no `test:` commit to approve. Commit the tests with a `test:` message first.")
+    state = load_state()
+    state.setdefault(str(issue), {})["tests_approved"] = tests[0]
     save_state(state)
-    emit("UserPromptSubmit", f"The user approved the tests at {tests[0][:8]} for issue #{issue}. "
-                             f"Tests are now locked. Move to step 5: {SKILL}/steps/5-implement.md")
+    print(f"Tests at {tests[0][:8]} approved for #{issue} and locked. Next: step 5, {SKILL}/steps/5-implement.md")
+
+
+def unlock_tests(cwd):
+    _, issue = branch_issue(cwd)
+    if issue is None:
+        sys.exit("This branch has no issue number.")
+    state = load_state()
+    state.get(str(issue), {}).pop("tests_approved", None)
+    save_state(state)
+    print(f"Tests for #{issue} unlocked. They need the user's approval again before implementation continues.")
 
 
 WRITE_TOOLS = ("Edit", "MultiEdit", "Write", "NotebookEdit")
@@ -291,10 +288,10 @@ def guard(payload):
     if tool in WRITE_TOOLS:
         path = str(args.get("file_path") or args.get("notebook_path") or "").replace("\\", "/")
         if path.endswith("/.claude/pipeline-state.json"):
-            emit("PreToolUse", deny="Only the user records pipeline approvals, by replying \"approve tests\".")
+            emit("PreToolUse", deny="Approvals are recorded only with pipeline.py approve-tests, after the user approves.")
         elif "/src/test/" in path and tests_locked(cwd):
             emit("PreToolUse", deny="Tests are locked after the user approved them. If a test is wrong, stop and "
-                                    "tell the user why. They can reply \"unlock tests\".")
+                                    "tell the user why. If they agree, record it with pipeline.py unlock-tests.")
     elif tool in SHELL_TOOLS:
         command = str(args.get("command") or "")
         if re.search(r"\bgh\s+pr\s+(merge|review\s+.*--approve)", command):
@@ -303,10 +300,10 @@ def guard(payload):
             emit("PreToolUse", deny="File issues with `python .claude/pipeline/pipeline.py file-issue` so they land "
                                     "on the right board.")
         elif "pipeline-state.json" in command:
-            emit("PreToolUse", deny="Only the user records pipeline approvals, by replying \"approve tests\".")
+            emit("PreToolUse", deny="Approvals are recorded only with pipeline.py approve-tests, after the user approves.")
         elif "src/test" in command.replace("\\", "/") and SHELL_WRITES.search(command) and tests_locked(cwd):
             emit("PreToolUse", deny="Tests are locked after the user approved them. If a test is wrong, stop and "
-                                    "tell the user why. They can reply \"unlock tests\".")
+                                    "tell the user why. If they agree, record it with pipeline.py unlock-tests.")
 
 
 def file_issue(argv):
@@ -365,11 +362,14 @@ def main():
     if mode == "file-issue":
         file_issue(sys.argv[2:])
         return
+    if mode in ("approve-tests", "unlock-tests"):
+        (approve_tests if mode == "approve-tests" else unlock_tests)(os.getcwd())
+        return
     if mode == "overview":
         print("\n".join(overview(os.getcwd())) or "No pipeline work in progress.")
         return
     payload = json.load(sys.stdin)
-    {"session-start": session_start, "prompt": prompt, "guard": guard}[mode](payload)
+    {"session-start": session_start, "guard": guard}[mode](payload)
 
 
 if __name__ == "__main__":

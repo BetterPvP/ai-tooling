@@ -34,12 +34,12 @@ The user starts it with `/pipeline` and an idea, an issue number, or nothing. No
 | 1 | [Slice](steps/1-slice.md) | Claude proposes, user picks | each slice is an issue |
 | 2 | [Spec](steps/2-spec.md) | user, Claude drafts | the issue has numbered ACs |
 | 3 | [Tests first](steps/3-tests.md) | Claude | failing tests committed as `test:` |
-| 4 | Approve tests | user | user replied `approve tests` |
+| 4 | Approve tests | user | the user approved, and you ran `approve-tests` |
 | 5 | [Implement](steps/5-implement.md) | Claude | tests pass, PR open |
 | 6 | [Gates](steps/6-gates.md) | CI | checks green |
 | 7 | AI review | review routine | advisory comment on the latest commit |
 | 8 | [Deploy](steps/8-deploy.md) | Claude, when asked | ClansTest-1 runs the branch |
-| 9 | Playtest | user | every `[play]` AC ticked in the PR |
+| 9 | Playtest | user | the user reported every `[play]` AC passing, and you ticked them in the PR |
 | 10 | Review | user | user reviewed and is ready to merge |
 | 11 | [Merged](steps/11-merged.md) | user merges, Claude cleans up | card Done, worktree gone |
 
@@ -56,9 +56,31 @@ On steps 4, 9 and 10, say what is waiting on the user and stop.
 - Docs and translations go in the same PR as the code.
 - Deploy only when asked. Playtesting is the user's.
 
+## Approvals
+
+The user approves in their own words, and nothing is approved until they do. Read their reply the way a colleague
+would: "looks good, go ahead" approves, "fine but rename X" does not yet. When a reply is ambiguous, or a lot rides
+on it, ask with the AskUserQuestion tool instead of guessing, for example "Approve these tests?" with the options
+Approve, Change something, Not yet.
+
+When they approve the tests, run `python .claude/pipeline/pipeline.py approve-tests`. That locks the tests. If a
+locked test turns out to be wrong, explain why and ask. Only when they agree, run
+`python .claude/pipeline/pipeline.py unlock-tests`. Never run either on your own judgement.
+
 ## Acceptance criteria
 
 ```
+## Approvals
+
+The user approves in their own words, and nothing is approved until they do. Read their reply the way a colleague
+would: "looks good, go ahead" approves, "fine but rename X" does not yet. When a reply is ambiguous, or a lot rides
+on it, ask with the AskUserQuestion tool instead of guessing, for example "Approve these tests?" with the options
+Approve, Change something, Not yet.
+
+When they approve the tests, run `python .claude/pipeline/pipeline.py approve-tests`. That locks the tests. If a
+locked test turns out to be wrong, explain why and ask. Only when they agree, run
+`python .claude/pipeline/pipeline.py unlock-tests`. Never run either on your own judgement.
+
 ## Acceptance criteria
 - [ ] AC1 [auto] A builder with no wood stops working.
 - [ ] AC2 [play] The builder shows the "needs wood" tag.
@@ -74,7 +96,7 @@ When the user stops, save what is unsaved, then end with `Resume: /pipeline #<is
 |---|---|
 | Draft spec | the issue body, marked `Status: Draft` |
 | Code in progress | pushed commits on the task branch (`wip:` is fine) |
-| Test approvals | `.claude/pipeline-state.json` (the user's `approve tests`) |
+| Test approvals | `.claude/pipeline-state.json` written by `approve-tests` |
 | Cleanup findings | the tracking issue |
 | Open questions | a comment on the issue |
 

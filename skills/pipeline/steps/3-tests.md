@@ -10,6 +10,7 @@ they must be short and readable.
    compile (empty methods or `throw new UnsupportedOperationException()`) and say so in the commit.
 4. Run them: `./gradlew :<module>:test --tests '<TestClass>'`. They must compile and fail for the right reason.
 5. Commit only the tests and the signatures: `test: AC1-AC4 for #<issue>`.
-6. Tell the user which test covers which AC, and ask them to read the tests and reply `approve tests`.
+6. Tell the user which test covers which AC and ask them to read the tests. Record their approval as described
+   under Approvals in [../SKILL.md](../SKILL.md).
 
 Do not write the implementation in this step.
