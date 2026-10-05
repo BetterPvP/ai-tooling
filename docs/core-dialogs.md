@@ -53,7 +53,8 @@ sessions.open(player, DialogScreen.builder()
 - **Background clicks.** Clicking the body focuses it and the client outlines it in white. The whole body carries a
   background click, so any click re-renders the screen and clears the outline.
 - **Pack.** `Resourcepack/tools/gui/`: `theme_art.py` draws theme art into `betterpvp:ui` at fixed codepoints,
-  `offset_fonts.py` writes the shifted fonts, `hide_dialog_warning.py` makes the warning button invisible.
+  `offset_fonts.py` writes the shifted fonts. The warning button is hidden by transparent `dialog/warning_button*`
+  sprites and an empty `menu.custom_screen_info.tooltip` in every language file.
 
 ## Extending it
 

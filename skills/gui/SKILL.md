@@ -88,6 +88,8 @@ canvas under a "Rejected" note so the history stays visible.
 List every texture and glyph the screen needs, marking which exist already (search the pack first) and which are new.
 For new art:
 
+- Only repeatable pipeline steps go in `Resourcepack/tools/`. A script that generates something once runs from the
+  scratchpad and is not committed.
 - Draw it with a reusable generator in `Resourcepack/tools/gui/` (Python, Pillow) driven by the theme tokens, so
   panels, buttons and frames stay consistent. Extend an existing generator before writing a new one.
 - Render a composite preview PNG at game scale (the mockup rebuilt from the real textures) and show it with
@@ -98,8 +100,8 @@ Before committing to a dialog technique not yet proven in game, run the spike in
 ## 6. Implement
 
 - Code follows the house rules and the menu patterns in `references/surfaces.md`. Dialogs use the dialog canvas
-  library (`DialogScreen`, `DialogCanvas`, `DialogSessions`), with art from `Resourcepack/tools/gui/theme_art.py`. Text goes through `Translations`
-  in all 12 locales and follows `docs/ui-style.md`.
+  library (`DialogScreen`, `DialogCanvas`, `DialogSessions`), with art from `Resourcepack/tools/gui/theme_art.py`.
+  Text goes through `Translations` in all 12 locales and follows `docs/ui-style.md`.
 - Textures and their glyphs go in the resource pack, never Nexo (`references/surfaces.md`). Rebuild the pack with
   `pack_processor.py`.
 - Compile, then `./gradlew shadowJar`.
