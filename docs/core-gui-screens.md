@@ -53,7 +53,8 @@ Core loads `core`. On `ServerLoadEvent` every screen is checked and problems are
 ```
 
 Positions are GUI pixels from the canvas top-left, or from the cell a layout gives the element. A canvas of up to
-460 x 189 fits a 480 x 270 screen (GUI scale 4 at 1080p) without scrolling, with its art drawn as `box` elements, which
+460 x 290 fits a 640 x 360 screen (GUI scale 3 at 1080p, the design target) without scrolling, and 460 x 189 fits a
+480 x 270 screen (GUI scale 4), with its art drawn as `box` elements, which
 move with the canvas. Taller canvases scroll on small screens, and hover art cannot follow a scrolled body. A screen with a
 `backdrop` stays within 174 px tall, since backdrop art only lines up while the body starts 63 px down.
 
@@ -66,7 +67,7 @@ player sees buttons sized to their own language, and the pack holds the art of e
 
 | Key | Draws | Notes |
 | --- | --- | --- |
-| `text` | text in a text style | `align` and `width` centre or right-align it |
+| `text` | text in a text style | `align` and `width` centre or right-align it. `"wrap": true` breaks it onto further lines within `width` (18 px apart for the `heading` style, 9 otherwise), `max_lines` caps them |
 | `box` | style art at a size | in `backdrop` it draws in the title, behind the canvas |
 | `button` | style art with a centred label | `selected`, `selected_style`, `label_style`, `selected_label_style`, `hover`, `selected_hover`, `pressed`, `tooltip`, `on_click` |
 | `icon` | a sprite | `frames` and `fps` loop it on the client |
@@ -133,6 +134,9 @@ registry.sound("clans", "open", "betterpvp:ui.open");
 registry.formatter("percent", (value, args) -> ...);
 ```
 
+Core registers `core:text_icons`: text followed by clickable icons placed wherever the text ends, such as a title and its
+buttons (properties `text`, `style`, `text_y`, `gap`, `spacing`, `icons`; list its sprites in `assets`).
+
 An `ElementType` draws through its `RenderContext`: `art(asset, x, y)`, `glyph(asset)`, `text(...)`, `styled(...)`,
 `click(action)` and `evaluate(binding)`. It can only draw art its node declared in `assets`.
 
@@ -175,6 +179,15 @@ The plugin and the generator assign glyph codes by the same rule (`ScreenAssets`
 - Hover art replaces an element's tooltip. Clicks re-render the screen, which clears the focus outline. While a
   button shows its pressed art, its hover art is dropped so the press shows.
 - An image inside a panel is an `icon` placed over a `box`. Tabs that show images put both in the tab's `switch` case.
+- An `icon` can name its sprite with a binding, such as `"icon": "portraits/{role}"` or `"{skill.icon}"`. The pack and
+  the plugin cannot list those sprites from the screen, so declare them in a `gui/assets/*.json` file at the same size
+  and frames. `tools/gui/sprite_assets.py` writes one for every PNG in a folder, so rerun it when icons are added. A
+  bound sprite that is not declared fails when the screen renders, not at validation, so check with
+  `GuiScreens.hasSprite` before drawing a sprite that may be missing and fall back to one that exists.
+- A sprite name is a path under `textures/gui/icons/`, or under `textures/` when the icons folder has no such file, so
+  existing pack textures (skill icons, menu icons) work without copies.
+- An animated `icon` whose frames stacked are taller than 256 px draws each frame as its own glyph, all at one spot,
+  and the text shader shows only the frame the clock is on (`frames:` assets, frame data in the corner pixels).
 - Arabic, Chinese, Japanese and Korean text snaps to 9 px rows.
 - The client draws each 9 px row as one text run and batches its glyphs by texture, so pieces that overlap within one
   row draw in no fixed order. Lower rows draw over higher ones. Anything drawn over a box starts on a later row than

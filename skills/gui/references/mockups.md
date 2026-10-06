@@ -16,7 +16,7 @@ Draw in Minecraft GUI pixels at GUI scale 3, so 1 GUI px is 3 CSS px.
 - Add a second artboard at GUI scale 2 (1 GUI px = 2 CSS px) for the hi-fi, since many players run it.
 - Dialog wireframes: draw the real dialog frame from `dialogs.md`: the 33 px header with the title, the body
   starting at y 63, the 33 px footer with the exit button, the blur behind. Name the screen-file element each part
-  becomes and mark every click target. Check the layout fits 480x270 (GUI scale 4 at 1080p).
+  becomes and mark every click target. Check the layout fits 640x360 (GUI scale 3 at 1080p): header 33, footer 33, body at y 47 for a 280 px canvas.
 - Dialog hi-fi mockups are not drawn by hand: the screen file is written and `build_gui.py --previews` renders it with
   the real art and font (`docs/core-gui-screens.md`).
 

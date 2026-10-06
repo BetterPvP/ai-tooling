@@ -99,8 +99,9 @@ width so it falls over a dead area of the art.
 
 Art is in GUI px, and the screen in GUI px changes with GUI scale. Two options, decide per theme:
 
-- **Design for 480x270** (scale 4 at 1080p): header 33 + footer 33 leaves about 174 px of body. Larger screens show the
-  same layout centred with more backdrop around it.
+- **Design for 640x360** (scale 3 at 1080p, the chosen target): header 33 + footer 33 leaves 294 px of body, so a
+  canvas up to 460x290 fits. At scale 4 (480x270) a canvas over 189 px scrolls. Larger screens show the same layout
+  centred with more of the world around it.
 - **Shader scaling**: a colour signature on the art glyphs that `rendertype_text` scales and anchors to `ScreenSize`,
   like the HUD trick. Shaders move pixels, never hitboxes, so only the non-interactive backdrop can scale this way.
   The current shader gate (`guiY < 120`) does not cover dialogs, so art needs its own signature.

@@ -62,8 +62,10 @@ element each part becomes (`button`, `repeat`, `switch` and so on).
   Repeated parts are components (`use`).
 - **Animation**: an `icon` with `frames` and `fps` loops on the client. Anything else that changes does so by
   re-rendering after an action.
-- **Size**: a full-screen dialog is a canvas of up to 460x189, the most a 480x270 screen (GUI scale 4 at 1080p)
-  shows without scrolling. Taller canvases scroll on small screens, where hover art drifts from its button. The art (panel,
+- **Size**: screens target GUI scale 3 at 1080p (640x360). A full-screen dialog is a canvas of up to 460x290, which
+  that screen shows without scrolling with the native Close button kept in the footer. Fill the height, the way a game
+  menu fills most of the screen. On a 480x270 screen (GUI scale 4) anything over 189 px tall scrolls and hover art
+  drifts from its button, which the user accepted. The art (panel,
   wells, cards) is `box` elements in the canvas, so it moves with the canvas at every GUI scale.
 - **Proportions**: in game the 1 px outline is inside a box, in the mockups it is outside, so an in-game size is the
   mockup size plus 2. Start from a `panel_header` box at y 5 (a 22 px header band): the title text at y 13 and 16 px
@@ -71,6 +73,13 @@ element each part becomes (`button`, `repeat`, `switch` and so on).
   `"width": "auto"` (padding 5 for tabs, 6 for buttons) in a row with `"cell": ["auto", h]`, so they size to their text
   in each language. Buttons are 20 px tall, wells and cards sit 8 px in from the panel edge. Normal buttons and tabs
   hover `light`, primary buttons and selected tabs hover `rim` (`"selected_hover": "rim"`).
+- **Look**: align everything to a pivot and its neighbours (text and icons centre on the controls and rows beside
+  them, tiles spread evenly across their card). Make selections obvious: a small tile selects with the `primary`
+  face. Use a thing's own colour for its name (bold, with a matching dark shadow). Keep long descriptions in tooltips. Use the `heading`
+  text style (double size) for titles that have room, falling back to the menu size when a translation would not
+  fit. Bars, continuous or in steps, take the outline and bevel (`fill`, `track`, `fill_open` + `track_open`). Text that
+  can run long wraps (`"wrap": true`, `"max_lines"`), and every text must fit its space in the longest translation,
+  or the screen fails to render. A screen whose header holds buttons uses `panel_header_tall` at y 8.
 - **Backdrop** art goes in the title, behind the canvas, and is never clipped or clickable. It only lines up while the
   canvas is at most 174 px tall, and its boxes may not overlap. Use it only for small screens.
 - **Inputs** (text, toggles, sliders, choices) sit below the canvas, in a column. They cannot go inside the art.

@@ -11,9 +11,11 @@ screen. It replaces Gilded Vigil and the wood and parchment menu art over time.
 
 ## Rules
 
-- Design in GUI px. Screen mockups are drawn at GUI scale 4 on a 1080p screen (480 x 270 GUI px, what Auto picks).
+- Design in GUI px. Screens target GUI scale 3 on a 1080p screen (640 x 360 GUI px). At GUI scale 4 (480 x 270, what
+  Auto picks) tall screens scroll.
   Design System previews draw at GUI scale 3.
-- Full-screen dialogs use a canvas of up to 460 x 189 GUI px, centred, with the native Close button in the footer. The
+- Full-screen dialogs use a canvas of up to 460 x 290 GUI px, centred, with the native Close button in the footer.
+  Screens fill most of the height. The
   art is `box` elements in the canvas, starting with a `panel_header` box and the title in its header band. In-game
   sizes are the mockup sizes plus 2, since the outline sits inside a box in game and outside it in the mockups.
 - Tabs and buttons size to their label (`"width": "auto"`), per language.
@@ -27,12 +29,30 @@ screen. It replaces Gilded Vigil and the wood and parchment menu art over time.
 - There is no default layout. Each screen picks from the components (list and card, card grid, showcase, table, action
   bar) or adds its own built from these rules.
 - Every text colour passes 4.5:1 on its surface.
+- Align everything to a pivot (top left, top right, left centre, centre) and to its neighbours. Text and icons centre
+  vertically on the controls and rows beside them, a row's contents centre in the row, and a set of tiles spreads
+  evenly across its card. An icon that belongs to a title sits level with it, pinned to the opposite corner.
+- Selections must be obvious. Rows and cards with text select with `selected` (tint inside a light green outline). A
+  small tile among many selects with the `primary` face (`"selected_style": "primary"`).
+- Bars, continuous or split into steps, have the outline and a bevel: `accent` fill with `accent-hi` top and left and
+  `accent-lo` bottom and right, and a `well-shade` track with the reverse bevel. A partly filled bar has no outline
+  between its fill and its track (styles `fill_open` beside `track_open`).
+- Titles use the heading size (`heading` text style, `betterpvp:rpg_large`) wherever they have room, and drop to the
+  menu size when a translation would not fit.
+- Use colour when the thing has one: a class name in its class colour, bold, with a shadow in a dark shade of that
+  colour. Chrome stays in the theme's tokens.
+- Long reading, such as skill descriptions, goes in tooltips, not on the page.
+- The thing a card is about gets a larger icon, at a whole multiple of its pixel size (the generator scales sprites up
+  by whole multiples).
+- Text that can run long wraps (`"wrap": true`, `"max_lines"`) instead of being cut off or overflowing.
 - No gradients, soft shadows or rounded corners.
 - Menu art lives in the resource pack, never Nexo.
 
 ## Type
 
-Menu text uses `Resources.Font.UI`, which is `betterpvp:rpg`, at one size. Hierarchy comes from colour and placement.
+Menu text uses `Resources.Font.UI`, which is `betterpvp:rpg`. Titles use `Resources.Font.UI_LARGE`
+(`betterpvp:rpg_large`, the same font at twice the size, text style `heading`). Below that, hierarchy comes from colour
+and placement.
 Every themed menu reads the font from there, so switching back to vanilla is a one-line change, and layouts must fit
 both fonts.
 
@@ -97,12 +117,15 @@ serves every size.
 | Button, disabled | style `disabled` | generated per screen | `"button": "disabled"` |
 | Hover | hover styles `light` (normal buttons, tabs) and `rim` (primary) | generated per spot | `"hover": "light"`, `"hover": "rim"` |
 | Tab | styles `tab`, `tab_selected` with pressed art | generated per screen | `"selected_style": "tab_selected"`, `"selected_label_style": "on_primary"`, `"hover": "light"`, `"selected_hover": "rim"` |
-| Progress bar | styles `track`, `fill` | generated per screen | two `box` elements |
+| Progress bar | styles `track`, `fill`, `track_open`, `fill_open` | generated per screen | a full bar is one `fill` or `track`; a partial bar is `fill_open` then `track_open` side by side. Make them buttons with the label's tooltip |
+| Header band, tall | style `panel_header_tall` (26 px band) | generated per screen | `"box": "panel_header_tall"` at y 8, header controls at y 9 to 33 |
+| Text with icons after it | | | `"custom": "core:text_icons"`: a title followed by clickable icons, wherever it ends |
 | Button, native | `minecraft:textures/gui/sprites/widget/button*.png` from `theme_art.py`, a darker stone so vanilla white labels read | | `"exit"`, `"buttons"`, white label |
 | Amount (coin) | `betterpvp:font/hud/coin.png` | `betterpvp:hud/center` `U+E001` | |
 | Text styles | | | `GuiRegistry`: `body`, `muted`, `value`, `title`, `error`, `on_primary` |
 | Tag | not built (needs a small tag font) | | |
-| Placeholder | not built | | |
+| Placeholder | sprite `button/unknown` (32 px dashed outline, grey question mark) | generated per screen | `"icon": "button/unknown"` where a picked item's icon would show |
+| Selected tile | style `primary` | generated per screen | `"selected_style": "primary"` on a small tile button |
 | Tooltip | not built | | |
 
 `theme_art.py` holds no theme art. It writes the vanilla button and tooltip sprites and encodes hover glyphs.
@@ -112,4 +135,4 @@ Hand-placed `betterpvp:ui` glyphs `U+E000` to `U+E008` are retired.
 
 | Screen | Canvas | Status |
 | --- | --- | --- |
-| Skill menus (`/build`: class select, builds, skill editor) | https://claude.ai/artifact/2J6pBCSRXCMqhxTVbYvTVF | Wireframes, Gilded Vigil, needs Limestone |
+| Skill menus (`/build`: class screen, class viewer, skill editor) | https://claude.ai/artifact/PoyEr6ChP8xi4nH2PHf2PP | Built (`champions:classes`, `build_editor`, `build_rename`), playtested |
