@@ -59,7 +59,7 @@ sessions.open(player, DialogScreen.builder()
   mouse, so blank space on a lower line would steal clicks from an element that starts above it. Space crossing a
   clickable element from an earlier line carries that element's click.
 - **Pack.** `Resourcepack/tools/gui/`: `build_gui.py` generates the art screens use (`docs/core-gui-screens.md`),
-  `theme_art.py` draws the theme's styles and replaced vanilla sprites, `offset_fonts.py` writes the shifted fonts. The warning button is hidden by transparent `dialog/warning_button*`
+  `theme_art.py` draws the replaced vanilla button and tooltip sprites and encodes hover glyphs, `offset_fonts.py` writes the shifted fonts. The warning button is hidden by transparent `dialog/warning_button*`
   sprites and an empty `menu.custom_screen_info.tooltip` in every language file.
 
 ## Extending it

@@ -44,7 +44,7 @@ Core loads `core`. On `ServerLoadEvent` every screen is checked and problems are
         "label": { "key": "shop.items" }, "on_click": { "set": { "tab": "items" } } } ] },
     { "switch": "{tab}", "cases": { "items": [
       { "repeat": "items", "max": 4, "layout": { "grid": { "x": 84, "y": 24, "cell": [100, 24], "gap": 4, "columns": 2 } },
-        "children": [ { "button": "steel", "width": 100, "height": 24, "label": "{item.name}", "hover": "rim", "pressed": true,
+        "children": [ { "button": "normal", "width": 100, "height": 24, "label": "{item.name}", "hover": "rim", "pressed": true,
                         "on_click": { "call": "buy", "args": { "id": "{item.id}" } } } ] } ] } },
     { "when": "{error}", "then": [ { "text": "{error}", "x": 84, "y": 100, "style": "error" } ] }
   ],
@@ -61,7 +61,7 @@ within 300 x 170 so the dialog fits a 480 x 270 screen (GUI scale 4 at 1080p).
 | --- | --- | --- |
 | `text` | text in a text style | `align` and `width` centre or right-align it |
 | `box` | style art at a size | in `backdrop` it draws in the title, behind the canvas |
-| `button` | style art with a centred label | `selected`, `selected_style`, `hover`, `pressed`, `tooltip`, `on_click` |
+| `button` | style art with a centred label | `selected`, `selected_style`, `label_style`, `selected_label_style`, `hover`, `pressed`, `tooltip`, `on_click` |
 | `icon` | a sprite | `frames` and `fps` loop it on the client |
 | `row`, `column`, `grid` | children in cells | `cell`, `gap`, `columns` |
 | `repeat` | children once per list entry | `max` copies at most, entry bound as `as` (default `item`) and `index` |
@@ -144,8 +144,9 @@ python tools/gui/build_gui.py --screens core=../BetterPvP/core/src/main/resource
   (`BETTERPVP_DIR`). `--betterpvp <folder>` or `--gui-screens <ns>=<folder>` override that. It does nothing when no
   input changed.
 - Art sources live in the pack under `assets/betterpvp/textures/gui/`. Styles are `styles/<name>.png` (nine-slice,
-  with `<name>.json` `{"border": 3}` and an optional `<name>.pressed.png`) or the built-in theme styles (`panel`,
-  `gold`, `steel`, `tab`, `tab_selected`). Hover styles are `hover/<name>.png` or the built-in `rim`. Icons are
+  with `<name>.json` `{"border": 3}` and an optional `<name>.pressed.png`). The theme's styles are `panel`, `header`,
+  `well`, `raised`, `selected`, `normal`, `primary`, `disabled`, `tab`, `tab_selected`, `track` and `fill`, each
+  stretched to the size a screen asks for. Hover styles are `hover/<name>.png` (the theme has `rim`). Icons are
   `icons/<name>.png`, animated ones with their frames stacked top to bottom. Not `gui/sprites/`, which the game
   stitches into the GUI atlas.
 - `python .claude/shared/deploy.py --pack` builds the pack from the current checkout and unpacks it into Nexo's pack

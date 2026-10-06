@@ -100,8 +100,8 @@ For new art:
 - Only repeatable pipeline steps go in `Resourcepack/tools/`. A script that generates something once runs from the
   scratchpad and is not committed.
 - Dialog art comes from styles, hover styles and sprites (`docs/core-gui-screens.md`, Pack generation). A new look is a
-  new built-in style in `theme_art.py` or a nine-slice PNG in the pack's `assets/betterpvp/textures/gui/styles/`, never
-  a hand-placed glyph. Icons go in `assets/betterpvp/textures/gui/icons/`, hover styles in `gui/hover/`.
+  nine-slice PNG in the pack's `assets/betterpvp/textures/gui/styles/`, drawn from the Design System tokens, never code
+  and never a hand-placed glyph. One PNG serves every size. Icons go in `assets/betterpvp/textures/gui/icons/`, hover styles in `gui/hover/`.
 - Other art: draw it with a reusable generator in `Resourcepack/tools/gui/` (Python, Pillow) driven by the theme
   tokens, so panels, buttons and frames stay consistent. Extend an existing generator before writing a new one.
 - Render a composite preview PNG at game scale (the mockup rebuilt from the real textures) and show it with
