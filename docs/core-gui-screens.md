@@ -54,7 +54,7 @@ Core loads `core`. On `ServerLoadEvent` every screen is checked and problems are
 
 Positions are GUI pixels from the canvas top-left, or from the cell a layout gives the element. A canvas of up to
 460 x 189 fits a 480 x 270 screen (GUI scale 4 at 1080p) without scrolling, with its art drawn as `box` elements, which
-move with the canvas. Taller canvases fail validation, since hover art cannot follow a scrolled body. A screen with a
+move with the canvas. Taller canvases scroll on small screens, and hover art cannot follow a scrolled body. A screen with a
 `backdrop` stays within 174 px tall, since backdrop art only lines up while the body starts 63 px down.
 
 A button's `"width": "auto"` is its label's width in the menu font plus `padding` on each side (6 by default) and the
@@ -68,7 +68,7 @@ player sees buttons sized to their own language, and the pack holds the art of e
 | --- | --- | --- |
 | `text` | text in a text style | `align` and `width` centre or right-align it |
 | `box` | style art at a size | in `backdrop` it draws in the title, behind the canvas |
-| `button` | style art with a centred label | `selected`, `selected_style`, `label_style`, `selected_label_style`, `hover`, `pressed`, `tooltip`, `on_click` |
+| `button` | style art with a centred label | `selected`, `selected_style`, `label_style`, `selected_label_style`, `hover`, `selected_hover`, `pressed`, `tooltip`, `on_click` |
 | `icon` | a sprite | `frames` and `fps` loop it on the client |
 | `row`, `column`, `grid` | children in cells | `cell`, `gap`, `columns` |
 | `repeat` | children once per list entry | `max` copies at most, entry bound as `as` (default `item`) and `index` |
@@ -172,7 +172,8 @@ The plugin and the generator assign glyph codes by the same rule (`ScreenAssets`
   names the asset.
 - After changing a screen's art, rerun the generator and redeploy the pack, or the client shows the wrong glyphs.
 - Buttons are at most 254 px wide. Art is at most 256 px tall. Wider boxes split into glyphs automatically.
-- Hover art replaces an element's tooltip. Clicks re-render the screen, which clears the focus outline.
+- Hover art replaces an element's tooltip. Clicks re-render the screen, which clears the focus outline. While a
+  button shows its pressed art, its hover art is dropped so the press shows.
 - An image inside a panel is an `icon` placed over a `box`. Tabs that show images put both in the tab's `switch` case.
 - Arabic, Chinese, Japanese and Korean text snaps to 9 px rows.
 - The client draws each 9 px row as one text run and batches its glyphs by texture, so pieces that overlap within one

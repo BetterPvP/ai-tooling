@@ -96,7 +96,7 @@ serves every size.
 | Button, primary | style `primary`, `primary.pressed` | generated per screen | `"button": "primary"`, `"label_style": "on_primary"` |
 | Button, disabled | style `disabled` | generated per screen | `"button": "disabled"` |
 | Hover | hover styles `light` (normal buttons, tabs) and `rim` (primary) | generated per spot | `"hover": "light"`, `"hover": "rim"` |
-| Tab | styles `tab`, `tab_selected` with pressed art | generated per screen | `"selected_style": "tab_selected"`, `"selected_label_style": "on_primary"` |
+| Tab | styles `tab`, `tab_selected` with pressed art | generated per screen | `"selected_style": "tab_selected"`, `"selected_label_style": "on_primary"`, `"hover": "light"`, `"selected_hover": "rim"` |
 | Progress bar | styles `track`, `fill` | generated per screen | two `box` elements |
 | Button, native | `minecraft:textures/gui/sprites/widget/button*.png` from `theme_art.py`, a darker stone so vanilla white labels read | | `"exit"`, `"buttons"`, white label |
 | Amount (coin) | `betterpvp:font/hud/coin.png` | `betterpvp:hud/center` `U+E001` | |
