@@ -52,8 +52,10 @@ Core loads `core`. On `ServerLoadEvent` every screen is checked and problems are
 }
 ```
 
-Positions are GUI pixels from the canvas top-left, or from the cell a layout gives the element. Keep the canvas
-within 300 x 170 so the dialog fits a 480 x 270 screen (GUI scale 4 at 1080p).
+Positions are GUI pixels from the canvas top-left, or from the cell a layout gives the element. A canvas of up to
+440 x 205 fits a 480 x 270 screen (GUI scale 4 at 1080p) with its art drawn as `box` elements, which move with the
+canvas. A screen with a `backdrop` stays within 174 px tall, since backdrop art only lines up while the body starts
+63 px down.
 
 ## Elements
 
@@ -144,7 +146,7 @@ python tools/gui/build_gui.py --screens core=../BetterPvP/core/src/main/resource
   (`BETTERPVP_DIR`). `--betterpvp <folder>` or `--gui-screens <ns>=<folder>` override that. It does nothing when no
   input changed.
 - Art sources live in the pack under `assets/betterpvp/textures/gui/`. Styles are `styles/<name>.png` (nine-slice,
-  with `<name>.json` `{"border": 3}` and an optional `<name>.pressed.png`). The theme's styles are `panel`, `header`,
+  with `<name>.json` `{"border": 3}` and an optional `<name>.pressed.png`). The theme's styles are `panel`, `panel_header` (a panel with a 24 px header band), `header`,
   `well`, `raised`, `selected`, `normal`, `primary`, `disabled`, `tab`, `tab_selected`, `track` and `fill`, each
   stretched to the size a screen asks for. Hover styles are `hover/<name>.png` (the theme has `rim`). Icons are
   `icons/<name>.png`, animated ones with their frames stacked top to bottom. Not `gui/sprites/`, which the game
@@ -167,3 +169,7 @@ The plugin and the generator assign glyph codes by the same rule (`ScreenAssets`
 - Hover art replaces an element's tooltip. Clicks re-render the screen, which clears the focus outline.
 - An image inside a panel is an `icon` placed over a `box`. Tabs that show images put both in the tab's `switch` case.
 - Arabic, Chinese, Japanese and Korean text snaps to 9 px rows.
+- The client draws each 9 px row as one text run and batches its glyphs by texture, so pieces that overlap within one
+  row draw in no fixed order. Lower rows draw over higher ones. Anything drawn over a box starts on a later row than
+  the box, and backdrop boxes (one run) never overlap. `build_gui.py` fails the pack build on a layout that breaks this.
+- Art glyphs draw without the text shadow, so styles look the same in game as in the Design System.

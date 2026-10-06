@@ -62,16 +62,18 @@ element each part becomes (`button`, `repeat`, `switch` and so on).
   Repeated parts are components (`use`).
 - **Animation**: an `icon` with `frames` and `fps` loops on the client. Anything else that changes does so by
   re-rendering after an action.
-- **Size**: the body canvas fits 480x270 (GUI scale 4 at 1080p). The body starts 63 px down and the footer is 33 px,
-  so keep the canvas at most about 300 px wide and 165 px tall unless the user picks shader scaling.
-- **Backdrop** art (panels, frames, the hero image) goes in the title, behind the canvas, and is never clipped. It is
-  not clickable.
+- **Size**: a full-screen dialog is a canvas of up to 440x205, which fills a 480x270 screen (GUI scale 4 at 1080p)
+  above the footer. Its art (panel, wells, cards) is `box` elements in the canvas, so it moves with the canvas at every
+  GUI scale. Start from a `panel_header` box with the screen's title text in the header band.
+- **Backdrop** art goes in the title, behind the canvas, and is never clipped or clickable. It only lines up while the
+  canvas is at most 174 px tall, and its boxes may not overlap. Use it only for small screens.
 - **Inputs** (text, toggles, sliders, choices) sit below the canvas, in a column. They cannot go inside the art.
 - **Text** leaves room for the longest translation (German and Russian run about 30% longer), since an element wider
   than the canvas fails. Arabic and CJK text snaps to 9 px rows.
 - **Live values** update by re-sending the screen, which resets scroll. Design screens that do not scroll.
-- **Draw order**: each 9 px row draws left to right and lower rows draw over higher ones. Put overlapping art where
-  that order works.
+- **Draw order**: lower 9 px rows draw over higher ones. Within one row, overlapping pieces draw in no fixed order, so
+  anything drawn over a box starts on a later row than the box (tabs at y 9 over a panel at y 0, text at y 45 over a
+  well at y 36). The pack build fails on a layout that breaks this.
 
 ## 3. Wireframes
 

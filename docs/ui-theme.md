@@ -13,8 +13,8 @@ screen. It replaces Gilded Vigil and the wood and parchment menu art over time.
 
 - Design in GUI px. Screen mockups are drawn at GUI scale 4 on a 1080p screen (480 x 270 GUI px, what Auto picks).
   Design System previews draw at GUI scale 3.
-- Full-screen dialogs use a panel of about 440 x 205 GUI px, centred, with the native Close button in the footer. Prove
-  the size on ClansTest-1 before a screen depends on it. Until then, `docs/core-gui-screens.md` still says 300 x 170.
+- Full-screen dialogs use a canvas of up to 440 x 205 GUI px, centred, with the native Close button in the footer. The
+  art is `box` elements in the canvas, starting with a `panel_header` box and the title in its header band.
 - Every panel, button, tab, well, bar and tooltip has a 1 GUI px outline. Raised things get a bevel, wells get the
   reverse bevel, pressed flips it.
 - The header band is one step darker than the panel, with dark text. Never a dark title bar.
@@ -85,7 +85,7 @@ serves every size.
 
 | Component | Texture | Font and codepoint | Code |
 | --- | --- | --- | --- |
-| Panel | style `panel` | generated per screen | `"box": "panel"` |
+| Panel | style `panel`, `panel_header` (24 px header band) | generated per screen | `"box": "panel_header"` |
 | Header band | style `header` | generated per screen | `"box": "header"` |
 | Well | style `well` | generated per screen | `"box": "well"` |
 | Raised (row, card, frame) | style `raised` | generated per screen | `"box": "raised"` |
@@ -96,7 +96,7 @@ serves every size.
 | Hover | hover style `rim` | generated per spot | `"hover": "rim"` |
 | Tab | styles `tab`, `tab_selected` with pressed art | generated per screen | `"selected_style": "tab_selected"`, `"selected_label_style": "on_primary"` |
 | Progress bar | styles `track`, `fill` | generated per screen | two `box` elements |
-| Button, native | `minecraft:textures/gui/sprites/widget/button*.png` from `theme_art.py` | | `"exit"`, `"buttons"` |
+| Button, native | `minecraft:textures/gui/sprites/widget/button*.png` from `theme_art.py`, a darker stone so vanilla white labels read | | `"exit"`, `"buttons"`, white label |
 | Amount (coin) | `betterpvp:font/hud/coin.png` | `betterpvp:hud/center` `U+E001` | |
 | Text styles | | | `GuiRegistry`: `body`, `muted`, `value`, `title`, `error`, `on_primary` |
 | Tag | not built (needs a small tag font) | | |
