@@ -13,8 +13,10 @@ screen. It replaces Gilded Vigil and the wood and parchment menu art over time.
 
 - Design in GUI px. Screen mockups are drawn at GUI scale 4 on a 1080p screen (480 x 270 GUI px, what Auto picks).
   Design System previews draw at GUI scale 3.
-- Full-screen dialogs use a canvas of up to 440 x 205 GUI px, centred, with the native Close button in the footer. The
-  art is `box` elements in the canvas, starting with a `panel_header` box and the title in its header band.
+- Full-screen dialogs use a canvas of up to 460 x 189 GUI px, centred, with the native Close button in the footer. The
+  art is `box` elements in the canvas, starting with a `panel_header` box and the title in its header band. In-game
+  sizes are the mockup sizes plus 2, since the outline sits inside a box in game and outside it in the mockups.
+- Tabs and buttons size to their label (`"width": "auto"`), per language.
 - Every panel, button, tab, well, bar and tooltip has a 1 GUI px outline. Raised things get a bevel, wells get the
   reverse bevel, pressed flips it.
 - The header band is one step darker than the panel, with dark text. Never a dark title bar.
@@ -85,7 +87,7 @@ serves every size.
 
 | Component | Texture | Font and codepoint | Code |
 | --- | --- | --- | --- |
-| Panel | style `panel`, `panel_header` (24 px header band) | generated per screen | `"box": "panel_header"` |
+| Panel | style `panel`, `panel_header` (22 px header band) | generated per screen | `"box": "panel_header"` at y 5 |
 | Header band | style `header` | generated per screen | `"box": "header"` |
 | Well | style `well` | generated per screen | `"box": "well"` |
 | Raised (row, card, frame) | style `raised` | generated per screen | `"box": "raised"` |
@@ -93,7 +95,7 @@ serves every size.
 | Button, normal | style `normal`, `normal.pressed` | generated per screen | `"button": "normal"` |
 | Button, primary | style `primary`, `primary.pressed` | generated per screen | `"button": "primary"`, `"label_style": "on_primary"` |
 | Button, disabled | style `disabled` | generated per screen | `"button": "disabled"` |
-| Hover | hover style `rim` | generated per spot | `"hover": "rim"` |
+| Hover | hover styles `light` (normal buttons, tabs) and `rim` (primary) | generated per spot | `"hover": "light"`, `"hover": "rim"` |
 | Tab | styles `tab`, `tab_selected` with pressed art | generated per screen | `"selected_style": "tab_selected"`, `"selected_label_style": "on_primary"` |
 | Progress bar | styles `track`, `fill` | generated per screen | two `box` elements |
 | Button, native | `minecraft:textures/gui/sprites/widget/button*.png` from `theme_art.py`, a darker stone so vanilla white labels read | | `"exit"`, `"buttons"`, white label |

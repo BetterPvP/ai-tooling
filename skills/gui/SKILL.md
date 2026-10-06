@@ -62,9 +62,14 @@ element each part becomes (`button`, `repeat`, `switch` and so on).
   Repeated parts are components (`use`).
 - **Animation**: an `icon` with `frames` and `fps` loops on the client. Anything else that changes does so by
   re-rendering after an action.
-- **Size**: a full-screen dialog is a canvas of up to 440x205, which fills a 480x270 screen (GUI scale 4 at 1080p)
-  above the footer. Its art (panel, wells, cards) is `box` elements in the canvas, so it moves with the canvas at every
-  GUI scale. Start from a `panel_header` box with the screen's title text in the header band.
+- **Size**: a full-screen dialog is a canvas of up to 460x189, the most a 480x270 screen (GUI scale 4 at 1080p)
+  shows without scrolling. Taller fails the build: a scrolled body moves away from its hover art. The art (panel,
+  wells, cards) is `box` elements in the canvas, so it moves with the canvas at every GUI scale.
+- **Proportions**: in game the 1 px outline is inside a box, in the mockups it is outside, so an in-game size is the
+  mockup size plus 2. Start from a `panel_header` box at y 5 (a 22 px header band): the title text at y 13 and 16 px
+  tabs at y 9, centred in the band on the row after the box, the tabs right after the title. Tabs and buttons take
+  `"width": "auto"` (padding 5 for tabs, 6 for buttons) in a row with `"cell": ["auto", h]`, so they size to their text
+  in each language. Buttons are 20 px tall, wells and cards sit 8 px in from the panel edge.
 - **Backdrop** art goes in the title, behind the canvas, and is never clipped or clickable. It only lines up while the
   canvas is at most 174 px tall, and its boxes may not overlap. Use it only for small screens.
 - **Inputs** (text, toggles, sliders, choices) sit below the canvas, in a column. They cannot go inside the art.

@@ -53,9 +53,14 @@ Core loads `core`. On `ServerLoadEvent` every screen is checked and problems are
 ```
 
 Positions are GUI pixels from the canvas top-left, or from the cell a layout gives the element. A canvas of up to
-440 x 205 fits a 480 x 270 screen (GUI scale 4 at 1080p) with its art drawn as `box` elements, which move with the
-canvas. A screen with a `backdrop` stays within 174 px tall, since backdrop art only lines up while the body starts
-63 px down.
+460 x 189 fits a 480 x 270 screen (GUI scale 4 at 1080p) without scrolling, with its art drawn as `box` elements, which
+move with the canvas. Taller canvases fail validation, since hover art cannot follow a scrolled body. A screen with a
+`backdrop` stays within 174 px tall, since backdrop art only lines up while the body starts 63 px down.
+
+A button's `"width": "auto"` is its label's width in the menu font plus `padding` on each side (6 by default) and the
+outline. It needs a fixed label (a key without arguments, or literal text). A row with `"cell": ["auto", h]` places
+its children one after another, `gap` apart. The plugin and the pack generator resolve these per language, so each
+player sees buttons sized to their own language, and the pack holds the art of every language.
 
 ## Elements
 
@@ -146,9 +151,10 @@ python tools/gui/build_gui.py --screens core=../BetterPvP/core/src/main/resource
   (`BETTERPVP_DIR`). `--betterpvp <folder>` or `--gui-screens <ns>=<folder>` override that. It does nothing when no
   input changed.
 - Art sources live in the pack under `assets/betterpvp/textures/gui/`. Styles are `styles/<name>.png` (nine-slice,
-  with `<name>.json` `{"border": 3}` and an optional `<name>.pressed.png`). The theme's styles are `panel`, `panel_header` (a panel with a 24 px header band), `header`,
+  with `<name>.json` `{"border": 3}` and an optional `<name>.pressed.png`). The theme's styles are `panel`, `panel_header` (a panel with a 22 px header band), `header`,
   `well`, `raised`, `selected`, `normal`, `primary`, `disabled`, `tab`, `tab_selected`, `track` and `fill`, each
-  stretched to the size a screen asks for. Hover styles are `hover/<name>.png` (the theme has `rim`). Icons are
+  stretched to the size a screen asks for. Hover styles are `hover/<name>.png`: the theme has `light` (a white ring,
+  for normal buttons and tabs) and `rim` (a green ring, for primary buttons). Icons are
   `icons/<name>.png`, animated ones with their frames stacked top to bottom. Not `gui/sprites/`, which the game
   stitches into the GUI atlas.
 - `python .claude/shared/deploy.py --pack` builds the pack from the current checkout and unpacks it into Nexo's pack
@@ -173,3 +179,6 @@ The plugin and the generator assign glyph codes by the same rule (`ScreenAssets`
   row draw in no fixed order. Lower rows draw over higher ones. Anything drawn over a box starts on a later row than
   the box, and backdrop boxes (one run) never overlap. `build_gui.py` fails the pack build on a layout that breaks this.
 - Art glyphs draw without the text shadow, so styles look the same in game as in the Design System.
+- The body is always as tall as the canvas, so hover art knows where the body sits. The pack's text shader places it
+  the way the client lays the dialog out: centred on whole pixels, 63 px down or higher when the body would not fit
+  above the footer. Hover spots on screens with inputs or a button grid below the canvas sit too low on small screens.
