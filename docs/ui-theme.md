@@ -2,55 +2,73 @@
 
 Status: Approved
 Design System: https://claude.ai/artifact/UQNMB1NX9DdJz5DRxdqjdb
-Directions canvas: https://claude.ai/artifact/3qMGQDvkzRP1s6VARyzoR2
-Last verified: 2026-10-05
+Directions canvas: https://claude.ai/artifact/3qMGQDvkzRP1s6VARyzoR2 (the Limestone kit and layouts are the last row)
+Last verified: 2026-10-06
 
-Gilded Vigil. Dark steel panels with a 1 GUI px black outline and bevels, bevelled steel buttons, and one gold accent.
-Stylised Minecraft that stays clean and calm, with violet kept for magic content. It replaces the wood and parchment menu
-art over time.
+Limestone. Pale stone panels with a dark 1 GUI px outline and bevels, a header band one step darker than the panel,
+white buttons and one green accent for the primary action. Stylised Minecraft that is light and calm, and fills the
+screen. It replaces Gilded Vigil and the wood and parchment menu art over time.
 
 ## Rules
 
-- Design in GUI px. Mockups draw at GUI scale 3 and are checked at GUI scale 2.
-- Every panel, button and tooltip has a 1 GUI px outline. Raised things get a bevel, wells get the reverse bevel.
-- Gold marks the one primary action, the selection, header trim and progress. One primary action per screen.
-- Violet is for magic content only (spells, enchantments, attunement, runes), never for chrome.
-- The Legendary tag shares the gold family with the accent. Accepted.
+- Design in GUI px. Screen mockups are drawn at GUI scale 4 on a 1080p screen (480 x 270 GUI px, what Auto picks).
+  Design System previews draw at GUI scale 3.
+- Full-screen dialogs use a panel of about 440 x 205 GUI px, centred, with the native Close button in the footer. Prove
+  the size on ClansTest-1 before a screen depends on it. Until then, `docs/core-gui-screens.md` still says 300 x 170.
+- Every panel, button, tab, well, bar and tooltip has a 1 GUI px outline. Raised things get a bevel, wells get the
+  reverse bevel, pressed flips it.
+- The header band is one step darker than the panel, with dark text. Never a dark title bar.
+- Green marks the one primary action and the selected tab. The lighter green outlines the selection and fills progress.
+  One primary action per screen.
+- Gold is only the coin. Violet is only magic content (spells, enchantments, attunement, runes). Neither is chrome.
+- Sizes are free per screen. Every style is a nine-slice, so buttons, tabs, arrows and panels take any size.
+- There is no default layout. Each screen picks from the components (list and card, card grid, showcase, table, action
+  bar) or adds its own built from these rules.
+- Every text colour passes 4.5:1 on its surface.
 - No gradients, soft shadows or rounded corners.
-- Big and calm by default. Dense only where the content is a table or list the player compares.
 - Menu art lives in the resource pack, never Nexo.
 
 ## Type
 
-Menu text uses `Resources.Font.UI`, which is `betterpvp:rpg`. Every themed menu reads it from there, so switching back to
-vanilla is a one-line change, and layouts must fit both fonts.
+Menu text uses `Resources.Font.UI`, which is `betterpvp:rpg`, at one size. Hierarchy comes from colour and placement.
+Every themed menu reads the font from there, so switching back to vanilla is a one-line change, and layouts must fit
+both fonts.
 
 - Letters come from the RPG bitmaps (Latin, accented Latin, Cyrillic).
-- Digits render in the vanilla font, so numbers stay readable.
+- Numbers render in the vanilla font.
 - Anything else falls back to `minecraft:default` (Arabic, Japanese, Korean, Chinese).
 
 `UtilFont` measures text in the font it is drawn in, using `font/rpg_advances.bin` for `betterpvp:rpg`. Regenerate it
 with `core/tools/pack_font_advances.py` whenever `rpg.json` or its textures change.
 
+## Coins, tags and portraits
+
+- An amount is the number in the vanilla font, then the coin texture `betterpvp:font/hud/coin.png` (14 x 13), centred
+  on each other and never split. Never the word "coins".
+- Rarity tags use the `ItemRarity` colours and names, all six. Small caps on a flat fill, 7 GUI px tall. Dark text on
+  Common, Uncommon and Legendary, white on Rare, Epic and Mythical. They need new tag art in the pack. The existing
+  `font/tags/*.png` glyphs stay for item lore.
+- Portrait slots are sizes only (16, 14, 12 GUI px, or a picture frame). The fill is not fixed: placeholders now, shader
+  heads or 3D rigs later.
+
 ## Palette
 
 | Token | Hex | Use |
 | --- | --- | --- |
-| outline | `#0C0B10` | Outline of every panel, button, tooltip |
-| surface-0 | `#12141C` | Wells: slots, tracks, inputs |
-| surface-1 | `#1A1E2B` | Header bands |
-| surface-2 | `#232838` | Panel body |
-| surface-3 | `#2C3244` | Raised rows, hover ground |
-| bevel-hi / bevel-lo | `#3A4258` / `#161A24` | Panel bevel |
-| ink / ink-muted / ink-disabled | `#EEF0F5` / `#A3AABD` / `#6B7183` | Text |
-| steel / steel-hi / steel-lo | `#5C6375` / `#838B9E` / `#343946` | Normal button, light text on it |
-| steel-hover | `#6E768A` | Hovered normal button |
-| tag-ink | `#14161D` | Text on tags |
-| accent / accent-hi / accent-lo | `#F2B33D` / `#FFE6A0` / `#C2611A` | Gold |
-| accent-title | `#FFD36B` | Titles and item names |
-| arcane / arcane-hi / arcane-lo | `#A77BFF` / `#D9C6FF` / `#6A3FD0` | Magic content |
-| success / danger | `#7BD88F` / `#E5484D` | States |
-| rarity common / uncommon / rare / legendary | `#C9CED9` / `#7BD88F` / `#6FA8FF` / `#FFC23D` | Tags |
+| outline | `#1F2124` | Outline of everything |
+| panel / panel-hi / panel-lo | `#D9D7D2` / `#F2F1EE` / `#ABA8A1` | Panel body and bevel |
+| header / header-hi / header-lo | `#C6C3BC` / `#D6D3CD` / `#A6A39C` | Header band |
+| well / well-shade / well-light | `#C4C1BA` / `#A6A39C` / `#E2E0DB` | Lists, tables, action bars, slots, progress track |
+| raised / raised-hi / raised-lo | `#E8E6E1` / `#FFFFFF` / `#B9B6AF` | Rows, cards, tabs, frames |
+| button / button-hover / button-pressed | `#F2F1EE` / `#FFFFFF` / `#D6D3CD` | Normal button |
+| disabled | `#B9B6AF` | Disabled button face |
+| placeholder | `#8E8B85` | Dashed empty slot |
+| ink / ink-muted / ink-disabled / ink-on-accent | `#2A2C30` / `#4A4C51` / `#6E6B65` / `#FFFFFF` | Text |
+| accent / accent-hi / accent-lo | `#3C8423` / `#5FA83A` / `#2A5E16` | Primary button, selected tab, selection outline, progress |
+| accent-rim / accent-pressed / accent-tint | `#86CC5E` / `#2E6E1A` / `#D9EBC9` | Primary hover and pressed, selected ground |
+| coin / coin-hi / coin-lo | `#F2B33D` / `#FFD36B` / `#C2611A` | Coin art only |
+| danger / arcane | `#A61B1B` / `#5B2FC0` | Refusals, magic content |
+| rarity common / uncommon / rare / epic / legendary / mythical | `#76D134` / `#4D9E15` / `#4A67FF` / `#8714B4` / `#EDA909` / `#E60B00` | Tags |
 
 The full set with usage notes is in the Design System tokens.
 
@@ -61,19 +79,25 @@ and list them here.
 
 ## Components
 
+The in-game styles below are still drawn in Gilded Vigil colours by `theme_art.py`. They need redrawing in Limestone,
+and the components marked not built need styles of their own.
+
 | Component | Texture | Font and codepoint | Code |
 | --- | --- | --- | --- |
-| Panel | style `panel` | generated per screen | `"box": "panel"` |
-| Button, gold | style `gold`, pressed built in | generated per screen | `"button": "gold"` |
-| Button, steel | style `steel`, pressed built in | generated per screen | `"button": "steel"` |
-| Button, hover rim | hover style `rim` | generated per spot | `"hover": "rim"` |
+| Panel | style `panel` (Gilded art) | generated per screen | `"box": "panel"` |
+| Button, primary | style `gold` (Gilded art, becomes green) | generated per screen | `"button": "gold"` |
+| Button, normal | style `steel` (Gilded art, becomes white) | generated per screen | `"button": "steel"` |
+| Button, hover | hover style `rim` | generated per spot | `"hover": "rim"` |
 | Button, native | `minecraft:textures/gui/sprites/widget/button*.png` | | `"exit"`, `"buttons"` |
+| Tab | styles `tab`, `tab_selected` (Gilded art) | generated per screen | `"selected_style": "tab_selected"` |
+| Header band, well, raised, selected | not built | | |
+| Tag | not built | | |
+| Amount (coin) | `betterpvp:font/hud/coin.png` | `betterpvp:hud/center` `U+E001` | |
+| List row, card, table, action bar | not built | | |
+| Progress bar | not built | | |
+| Placeholder | not built | | |
 | Slot | not built | | |
 | Tooltip | not built | | |
-| Tag | not built | | |
-| Tab | styles `tab`, `tab_selected` (not in the Design System yet) | generated per screen | `"selected_style": "tab_selected"` |
-| List row | not built | | |
-| Progress bar | not built | | |
 
 Screen art is generated by `Resourcepack/tools/gui/build_gui.py` from the screen files (`docs/core-gui-screens.md`),
 drawn with the style functions in `theme_art.py` or the sources in `Resourcepack/gui/`. Hand-placed `betterpvp:ui`
@@ -83,4 +107,4 @@ glyphs `U+E000` to `U+E008` are retired.
 
 | Screen | Canvas | Status |
 | --- | --- | --- |
-| Skill menus (`/build`: class select, builds, skill editor) | https://claude.ai/artifact/2J6pBCSRXCMqhxTVbYvTVF | Wireframes |
+| Skill menus (`/build`: class select, builds, skill editor) | https://claude.ai/artifact/2J6pBCSRXCMqhxTVbYvTVF | Wireframes, Gilded Vigil, needs Limestone |
