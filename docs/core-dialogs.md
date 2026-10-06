@@ -55,14 +55,17 @@ sessions.open(player, DialogScreen.builder()
   re-renders unless the callback already re-rendered, opened another screen or closed it.
 - **Background clicks.** Clicking the body focuses it and the client outlines it in white. The whole body carries a
   background click, so any click re-renders the screen and clears the outline.
-- **Pack.** `Resourcepack/tools/gui/`: `theme_art.py` draws theme art into `betterpvp:ui` at fixed codepoints,
-  `offset_fonts.py` writes the shifted fonts. The warning button is hidden by transparent `dialog/warning_button*`
+- **Tall clickable elements.** The client checks the body line by line and takes the last clickable text under the
+  mouse, so blank space on a lower line would steal clicks from an element that starts above it. Space crossing a
+  clickable element from an earlier line carries that element's click.
+- **Pack.** `Resourcepack/tools/gui/`: `build_gui.py` generates the art screens use (`docs/core-gui-screens.md`),
+  `theme_art.py` draws the theme's styles and replaced vanilla sprites, `offset_fonts.py` writes the shifted fonts. The warning button is hidden by transparent `dialog/warning_button*`
   sprites and an empty `menu.custom_screen_info.tooltip` in every language file.
 
 ## Extending it
 
-- New art: add an entry with a new codepoint to `theme_art.py`, run it, then `offset_fonts.py`. Never move an
-  existing codepoint.
+- New art: declare it in a screen file or `gui/assets/*.json` and let `build_gui.py` generate it. Never hand-place
+  glyphs at fixed codepoints.
 - A new shiftable font: add it to `VerticalOffsets` and to `FONTS` in `offset_fonts.py`.
 - Translated text: render it for the viewer before placing it, or it measures as zero.
 

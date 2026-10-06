@@ -60,7 +60,8 @@ Ask with a card: Open the PR · Not yet.
   the AC table naming the test for each `[auto]` AC and "playtest" for each `[play]` AC.
 - Run `python .claude/shared/board.py tidy <pr>` and `python .claude/shared/board.py status <issue> in_review`.
 - If there are `[play]` ACs, ask with a card: Deploy to ClansTest-1 now · Later. To deploy, run `./gradlew shadowJar`
-  in the worktree, then `python .claude/shared/deploy.py`. Never playtest yourself. When the user reports results,
+  in the worktree, then `python .claude/shared/deploy.py`, with `--pack` when screen files or pack art changed. Never
+  playtest yourself. When the user reports results,
   tick the passing `[play]` ACs in the PR body with
   `gh api -X PATCH repos/<repo>/pulls/<pr> -F body=@<file>`.
 

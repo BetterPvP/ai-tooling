@@ -1,6 +1,6 @@
 # Core: GUI screens
 
-Status: Approved · Last verified: 2026-10-05, 9320c4dfa
+Status: Approved · Last verified: 2026-10-06, 9d6e6bf6b
 
 ## Purpose
 
@@ -23,8 +23,9 @@ VS Code autocompletes and validates every file. Other editors pick them up from 
 `theme.schema.json` lists the styles, hover styles and sprites the pack can draw. The pack generator rewrites it with
 `--schema-out`.
 
-A plugin loads its files once at startup with `guiScreens.load("<namespace>", <PluginClass>.class)`. Core loads
-`core`. On `ServerLoadEvent` every screen is checked and problems are logged with the screen and element named.
+A plugin loads its files once at startup with `guiScreens.load("<namespace>", <PluginClass>.class)`. The namespace
+is the module's folder name (`core`, `clans`, `champions`), since the pack generator finds the files by module folder.
+Core loads `core`. On `ServerLoadEvent` every screen is checked and problems are logged with the screen and element named.
 
 ## A screen
 
@@ -138,11 +139,17 @@ python tools/gui/build_gui.py --screens core=../BetterPvP/core/src/main/resource
 
 - It checks every file against the schemas, then writes glyphs to `textures/font/gui/<namespace>/`, the font
   `betterpvp:gui/<namespace>` and its `down_1..8` copies. All of it is gitignored.
-- `pack_processor.py pack --gui-screens core=...` runs it before packing. It does nothing when no input changed.
-- Styles come from `Resourcepack/gui/styles/<name>.png` (nine-slice, with `<name>.json` `{"border": 3}` and an
-  optional `<name>.pressed.png`) or the built-in theme styles (`panel`, `gold`, `steel`, `tab`, `tab_selected`).
-  Hover styles come from `gui/hover/` or the built-in `rim`. Sprites come from `gui/sprites/`, animated ones with their
-  frames stacked top to bottom.
+- `pack_processor.py pack` runs it before packing, for every module of the BetterPvP checkout with a
+  `src/main/resources/gui/` folder. It asks for the checkout once and keeps it in the pack repo's `.env`
+  (`BETTERPVP_DIR`). `--betterpvp <folder>` or `--gui-screens <ns>=<folder>` override that. It does nothing when no
+  input changed.
+- Art sources live in the pack under `assets/betterpvp/textures/gui/`. Styles are `styles/<name>.png` (nine-slice,
+  with `<name>.json` `{"border": 3}` and an optional `<name>.pressed.png`) or the built-in theme styles (`panel`,
+  `gold`, `steel`, `tab`, `tab_selected`). Hover styles are `hover/<name>.png` or the built-in `rim`. Icons are
+  `icons/<name>.png`, animated ones with their frames stacked top to bottom. Not `gui/sprites/`, which the game
+  stitches into the GUI atlas.
+- `python .claude/shared/deploy.py --pack` builds the pack from the current checkout and unpacks it into Nexo's pack
+  folder on ClansTest-1 before the restart.
 - `--previews` writes a PNG of each screen at GUI scale 3 with English text, for review without logging in.
 
 The plugin and the generator assign glyph codes by the same rule (`ScreenAssets`, `build_gui.py`).
@@ -157,4 +164,5 @@ The plugin and the generator assign glyph codes by the same rule (`ScreenAssets`
 - After changing a screen's art, rerun the generator and redeploy the pack, or the client shows the wrong glyphs.
 - Buttons are at most 254 px wide. Art is at most 256 px tall. Wider boxes split into glyphs automatically.
 - Hover art replaces an element's tooltip. Clicks re-render the screen, which clears the focus outline.
+- An image inside a panel is an `icon` placed over a `box`. Tabs that show images put both in the tab's `switch` case.
 - Arabic, Chinese, Japanese and Korean text snaps to 9 px rows.
