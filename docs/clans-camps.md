@@ -53,6 +53,13 @@ clan id, so the site framework works in numbers throughout.
   its `PlacedStructure.storage`, keyed by position in the build. `StructureView` fills a container when its layer
   goes up, writes it down on inventory close and before its layer comes down, and a finished build moves contents of
   containers it no longer has into the rest (dropping overflow). Demolish drops the lot.
+- Who may use a structure is core's `ConstructionService.canUse`: anyone on a `publicUse` type, otherwise whoever
+  the site's `isMember` counts (for camps, `Camps.isMember`, the clan). `StructureViews` checks it before firing
+  `StructurePieceUseEvent`, so piece handlers such as `UpgradePieces` only see players who may use the structure.
+  Anyone else gets `core.construction.not_yours`.
+- `ConstructionService.disable` knocks a working structure out until it is repaired. A `selfRepairing` type comes
+  back on the next `refresh` once its repair time has passed since `disabledAt`, unless a paid repair is running, which
+  is then claimed as usual. A job can be cancelled only while it is still running.
 - `CampContent`: `CampGrounds`, the dock, core's `BuildZones` (Mapper cuboids named `build_zone`), `StartingCamp`,
   then core's `StructureViews`, in that order.
 
