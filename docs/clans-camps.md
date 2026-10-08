@@ -22,7 +22,7 @@ clan id, so the site framework works in numbers throughout.
   `CampStructure` whose numbers (versions with build, cost and time, move, repair, demolish refund, icon) come from
   `camps.yml` `structures.<id>`. `StartingCamp` seeds an empty holding from the skin's `camp_start` perspective
   markers tagged `structure:<id>` (the Dock starts broken).
-- `menu/`: `ConstructionMenu` (availability via `ConstructionService.unavailable`, hands out blueprints) and
+- `menu/`: `ConstructionMenu` (availability via `ConstructionChecks.unavailable`, hands out blueprints) and
   `CampPermissionsMenu` (leader edits, leader row always allowed). Players reach both only through the Steward.
 - `hall/`: the **Steward**, one NPC on the Great Hall's `steward` point. Right-click opens `GreatHallMenu`, the hub
   for everything a clan manages: Settlers (roster), Wages, Crews, Construction, Permissions, nested with `BackButton`.
@@ -53,7 +53,7 @@ clan id, so the site framework works in numbers throughout.
   its `PlacedStructure.storage`, keyed by position in the build. `StructureView` fills a container when its layer
   goes up, writes it down on inventory close and before its layer comes down, and a finished build moves contents of
   containers it no longer has into the rest (dropping overflow). Demolish drops the lot.
-- Who may use a structure is core's `ConstructionService.canUse`: anyone on a `publicUse` type, otherwise whoever
+- Who may use a structure is core's `ConstructionSites.canUse`: anyone on a `publicUse` type, otherwise whoever
   the site's `isMember` counts (for camps, `Camps.isMember`, the clan). `StructureViews` checks it before firing
   `StructurePieceUseEvent`, so piece handlers such as `UpgradePieces` only see players who may use the structure.
   Anyone else gets `core.construction.not_yours`.
