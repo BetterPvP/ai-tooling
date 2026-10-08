@@ -124,6 +124,7 @@ skin loads, and keeps the old head while a refresh runs. Key any memo on the exa
 | `docs/core-gui-screens.md` | GUI screen files: JSON screens, schema, runtime, pack generation |
 | `docs/core-sites.md` | Sites, instances, residency, crews, owned sites |
 | `docs/core-construction.md` | Structures, jobs, checks, blueprints and structure views |
+| `docs/core-mob-ai.md` | Code-driven mobs: AI components, arbitration, navigation and animation |
 | `docs/core-network.md` | Message bus, site directory, player transfer, cross-server chat |
 | `docs/clans-resource-nodes.md` | Resource-node POIs (ores, trees, fishing) authoring |
 | `docs/clans-props.md` | Data-driven props authoring |

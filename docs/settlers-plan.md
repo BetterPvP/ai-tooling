@@ -48,10 +48,10 @@ The data, with nothing in the world yet.
 ### S2. Settlers in the world
 
 * Core
-  * `SettlerNPC`: a `ModeledNPC` with a nameplate (name in its rarity colour, profession above). Invulnerable. Legendary settlers give off a faint particle.
+  * `SettlerNPC`: a `SceneMob` with a nameplate (name in its rarity colour, profession above). Invulnerable. Legendary settlers give off a faint particle.
   * `SettlerLook`: model, skin and idle, walk and work animations. The site supplies it, so camps can fall back to a placeholder model while a profession's own is not installed.
   * `SettlerPresence` (`WorldContent`): spawns every settler of the camp whose world opened, follows joins, departures and assignments, and releases them on close.
-  * `SettlerRoutine`: wander around home, walk to an assignment, play the work animation there. Only moves while a player is near.
+  * Settler behaviour (see `core-mob-ai.md`): post, wander and look-at-nearby-player components on `SettlerNPC` walk it to its assignment and play the work animation there, or wander around home. It only moves while a player is near.
   * `SettlerSite` gains `allows` (`SettlerAction`: hire, assign, dismiss, pay), `look`, `home`, `workplace` and `interact`.
   * Right-click a settler to open its card.
 * Clans
