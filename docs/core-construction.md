@@ -1,6 +1,6 @@
 # Core: construction
 
-Status: Approved · Last verified: 2026-10-08, b15d8ea07
+Status: Approved · Last verified: 2026-10-08, 164ac7dab
 
 ## Purpose
 
@@ -198,7 +198,8 @@ Hand players a blueprint with `BlueprintSessions.blueprintFor` or `blueprintToMo
 
 ## Gotchas
 
-- `StructureStatusTracker.refresh` runs only from `StructureViews`, so only for loaded worlds. Self-repair and status
+- `StructureStatusTracker.refresh` runs from `StructureViews` once a second and from `CrewService` on crew changes, so
+  only for loaded worlds. Self-repair and status
   events wait until the world is loaded again. Job progress does not.
 - Status precedence: Not placed wins, then Paused, then Ready to claim. Next a Disabled condition reads as Disabled
   whatever job runs. Otherwise a build or move reads as Under construction and an advance as Advancing.
