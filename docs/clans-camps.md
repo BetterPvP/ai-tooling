@@ -44,22 +44,10 @@ clan id, so the site framework works in numbers throughout.
   sent with `Placement.send(player, handle, "barracks")`, a named landing core's `SiteLandings` resolves on the
   camp's server. `CampArrivalNotices` lists structures ready to claim, needing repair or disabled when a member
   arrives. Allies get their own row in the permissions menu (actions plus container access), stored on `Camp`.
-- Structures grow through **stages** (`StructureStage`, `advance`). **Upgrades** are the one-of-several choice per
-  stage: core `StructureUpgrade`, `ConstructionService.upgrade`, `FIT_UPGRADE` jobs, pieces on `upgrade:<id>` points.
-  Each effect class in `world/camp/upgrade/` declares its upgrade through `CampUpgrades.declare` and checks
-  `CampUpgrades.has`; numbers in `camps.yml` `structures.<id>.upgrades.<id>`. Old records with `version`/`UPGRADE`
-  still read through `@JsonAlias` (UPGRADE = advance).
-- Item storage is core's `StructureStorage`: every chest, trapped chest and barrel in a structure's build is kept on
-  its `PlacedStructure.storage`, keyed by position in the build. `StructureView` fills a container when its layer
-  goes up, writes it down on inventory close and before its layer comes down, and a finished build moves contents of
-  containers it no longer has into the rest (dropping overflow). Demolish drops the lot.
-- Who may use a structure is core's `ConstructionSites.canUse`: anyone on a `publicUse` type, otherwise whoever
-  the site's `isMember` counts (for camps, `Camps.isMember`, the clan). `StructureViews` checks it before firing
-  `StructurePieceUseEvent`, so piece handlers such as `UpgradePieces` only see players who may use the structure.
-  Anyone else gets `core.construction.not_yours`.
-- `ConstructionService.disable` knocks a working structure out until it is repaired. A `selfRepairing` type comes
-  back on the next `refresh` once its repair time has passed since `disabledAt`, unless a paid repair is running, which
-  is then claimed as usual. A job can be cancelled only while it is still running.
+- Structures, jobs, upgrades, item storage, the use gate, disabling and self-repair: see `core-construction.md`.
+- `upgrade/`: each effect class declares its upgrade through `CampUpgrades.declare` and checks `CampUpgrades.has`.
+  Numbers are in `camps.yml` `structures.<id>.upgrades.<id>`. `structure/UpgradePieces` handles piece clicks.
+- `Camps.isMember` (the clan) is who may use a camp structure that is not public.
 - `CampContent`: `CampGrounds`, the dock, core's `BuildZones` (Mapper cuboids named `build_zone`), `StartingCamp`,
   then core's `StructureViews`, in that order.
 
