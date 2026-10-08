@@ -252,7 +252,8 @@ From outside, `replan()` makes a mob reconsider (settlers do it when an assignme
 - A chunk-managed mob loses its whole AI state on every chunk load: pending orders, threat, rest timers and home are
   reset. Home becomes wherever the body spawns.
 - `attend` and `orderTo` fail before the first `onInit`, since their components do not exist yet.
-- `stopAnimation` relies on ModelEngine's lerp-out from when the clip was played.
+- ModelEngine's `AnimationHandler.stopAnimation` takes no blend time. A stopped clip blends out over the 0.2 second
+  lerp-out passed when it was played.
 - Retaliate forgets a stale attacker only when the entity is still loaded. An attacker that left the server stays in
   the table until decay drops it.
 - `WanderComponent` without `rest` uses `moveTo`, which never searches again. Only `travelTo` trips recover from no
