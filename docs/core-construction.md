@@ -136,7 +136,7 @@ Site-behalf actions check no permission.
 `PlacedStructure.status(now)` derives the status. A held job is Paused and a done one is Ready to claim. A running
 build or move is Under construction and a running advance is Advancing. A repair or upgrade job leaves the status of
 the condition. Only Active is usable. A Disabled structure whose type is `selfRepairing` goes back to Active once its
-repair time has passed since `disabledAt`, unless a job is running on it.
+repair time has passed since `disabledAt`, unless a repair job is on it.
 
 `ConstructionSites.canUse` decides who may use a structure's features: anyone if its type is `publicUse`, otherwise
 whoever the site's `isMember` counts.
@@ -200,8 +200,8 @@ Hand players a blueprint with `BlueprintSessions.blueprintFor` or `blueprintToMo
 
 - `StructureStatusTracker.refresh` runs only from `StructureViews`, so only for loaded worlds. Self-repair and status
   events wait until the world is loaded again. Job progress does not.
-- Status precedence: a job's status wins over the condition for builds, moves and advances. A Disabled structure with
-  an advance running reads as Advancing.
+- Status precedence: Not placed wins, then Paused, then Ready to claim. Next a Disabled condition reads as Disabled
+  whatever job runs. Otherwise a build or move reads as Under construction and an advance as Advancing.
 - `StructureShapes` caches footprints and bounds keyed by the schematic service's generation. A schematic reload
   drops the cache, so do not hold on to a footprint across reloads.
 - `StructureStorage` reads only loaded chunks and only container blocks. A missing block means nothing is written.
