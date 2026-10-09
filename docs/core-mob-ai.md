@@ -5,7 +5,7 @@ Status: Approved · Last verified: 2026-10-08, 9276a60b9
 ## Purpose
 
 `core/scene/mob/` runs code-driven mobs. A `SceneMob` is an NPC whose behaviour is a stack of `AIComponent`s that
-an `AIController` arbitrates each tick, much like vanilla goals but in code we own. The body is a vanilla mob with
+an `AIController` arbitrates each tick, much like vanilla goals but in code we own. The body is a vanilla mob (the factory picks it) with
 its vanilla goals removed, optionally hidden under a ModelEngine model. Logical animation states map to model clips
 through providers. Settlers (`SettlerNPC`) are the one user on `camps` today.
 
@@ -47,7 +47,7 @@ Root package:
 
 | Type | What it is |
 |---|---|
-| `MobAnimation` | Logical states. Looping: `IDLE`, `WALK`, `WORK`. One-shot: `ATTACK`, `HURT`, `DEATH` |
+| `MobAnimation` | Logical states. Looping: `IDLE`, `WALK`, `WORK`. One-shot: `ATTACK`, `HURT`, `DEATH` (unused, the death check looks for a clip named `death`) |
 | `AnimationProvider` | Resolves a state to a clip id against the mob's live state |
 | `AnimationProviders` | `fixed`, `random`, `sequential`, `when`, `whenTargeting` |
 | `AnimationController` | Holds the looping state, swaps clips, plays one-shots and raw clips |
@@ -81,8 +81,8 @@ A `SceneMob` gets its body in one of the two ways every `SceneObject` does.
 `onInit` runs on every spawn, so a chunk-managed mob starts from scratch each time. It:
 
 1. Clears the components, target and threat, and resets the activation state.
-2. With a `modelId`, binds that ModelEngine model, turns on the hurt tint when `damageTint` is set, and hides and
-   silences the host.
+2. With a `modelId`, binds that ModelEngine model, turns on the hurt tint unless `damageTint` is null (red by
+   default), and hides and silences the host when it is a `Mob`.
 3. Removes every vanilla goal from the body.
 4. Makes a new `Navigator` and `AnimationController`, sets `homeAnchor` to where the body stands, and attaches the
    sound behaviour.
@@ -150,7 +150,7 @@ true while the pathfinder has a path. Every call does nothing when the body is n
 `travelTo` starts a trip to a fixed point, driven by `Navigator.tick`:
 
 - Arrived means within 1.5 blocks across and 2.5 blocks up or down (`hasArrived`).
-- With no current path it searches again, at most once every 10 ticks.
+- With no current path it searches again, with 10 ticks between searches.
 - A body that moves less than 0.05 blocks over 100 ticks searches again.
 - After 20 searches it gives up, ends the trip and runs `onGiveUp` once.
 
@@ -173,8 +173,8 @@ and teleports to them beyond `teleportRange` (25).
 Targeting drops an invalid target and sets whatever `TargetSelector.select` returns, or none.
 
 Retaliate runs while the `ThreatTable` is not empty. Each tick it decays every entry by `threatDecay` (0.5),
-dropping those at zero, and targets the highest valid attacker. A living attacker that is no longer valid is
-removed. Stopping clears the target.
+dropping those at zero, and targets the attacker with the most threat. If that one is no longer valid it is
+removed and there is no target that tick. Stopping clears the target.
 
 Melee attack starts with a target and runs while it is valid. Out of reach it chases at `chaseSpeed`. Reach is the mob's box grown
 by `attackRange` (2.5) overlapping the target's. In reach it swings once per `cooldownMillis`, playing ATTACK and the
@@ -186,7 +186,7 @@ hit and plays IDLE.
 Look at target faces the target's eyes each tick while there is one.
 
 Post takes a `Supplier<Optional<Location>>`. It asks only when deciding: on first start, after a rest, after a
-replan, and after a preempted trip. With a post it travels there, and on arrival stops pathing and holds WORK until
+replan, and after any stop outside a rest. With a post it travels there, and on arrival stops pathing and holds WORK until
 replanned or preempted. When the trip gives up it rests (5 to 15 seconds by default) and asks again. With no post
 it does not start, and asks again after a rest, leaving lower components free.
 
@@ -226,7 +226,7 @@ entity, or a projectile it shot, reaches the mob. The attacker gains threat equa
 
 A new mob:
 
-1. Extend `SceneMob`. In the constructor set the entity type and `Disposition`, then `modelId`, `activationRadius`,
+1. Extend `SceneMob`. In the constructor set the `Disposition`, then `modelId`, `activationRadius`,
    `pathRange`, animations and sounds as needed.
 2. Override `registerComponents` and add components in priority order with `getAi().add`. Attend and orders go on
    top automatically.

@@ -51,19 +51,19 @@ Events: `StructurePlacedEvent`, `StructureRemovedEvent`, `StructureClaimedEvent`
 `blueprint/`, placing by hand:
 
 - `StructureBlueprintItem`: the `core:structure_blueprint` item, named after its structure as a build or a move.
-- `StructureBlueprintComponent`: the structure type id, plus the placed structure it moves if it is a move blueprint.
-- `StructureBlueprintSerializer`: writes both to the item's data. A move id that is not a UUID reads back as none.
+- `StructureBlueprintComponent`: package-private. The structure type id, plus the placed structure it moves if it is a move blueprint.
+- `StructureBlueprintSerializer`: package-private. Writes both to the item's data. A move id that is not a UUID reads back as none.
 - `BlueprintSessions`: the preview while a blueprint is held, and the build or move on right-click. It also hands out
   blueprints with `blueprintFor` and `blueprintToMove`.
 
 `view/`, the structure in the world:
 
 - `StructureViews`: world content that shows every structure of a loaded holding and keeps it current. It also guards
-  clicks on structures and writes containers down on close.
+  clicks on structures and writes containers down on close. `structureAt` finds the loaded structure a block belongs to.
 - `StructureView`: one structure's blocks, label, claim flash, upgrade pieces and containers. Package-private.
-- `StructureProp`: the label, a two-line text display that carries a hitbox while it asks for an action.
+- `StructureProp`: the label, a two-line text display that carries a hitbox while it asks for an action. Package-private.
 - `ClaimFlash`: gold glowing block displays over a structure waiting to be claimed. Package-private.
-- `ConstructionPropFactory`: the scene factory that owns structure props. They are never spawned by command.
+- `ConstructionPropFactory`: the scene factory that owns structure props. They are never spawned by command. Package-private.
 
 ## How it works
 
@@ -115,8 +115,8 @@ govern running jobs, so a finished job waits to be claimed whatever changes arou
 Site-behalf actions check no permission.
 
 - `build`: pays stage 0 and adds the structure Under construction with a Build job.
-- `claim`: needs a finished job. A build becomes the type's initial condition (Needs repair if it `startsBroken`),
-  an advance moves to its stage, a move to its target, a repair to Active, an upgrade job records the upgrade.
+- `claim`: needs a finished job that is not held. A build becomes the type's initial condition (Needs repair if it `startsBroken`),
+  an advance moves to its stage, a move to its target, a repair to Active, an upgrade job records the upgrade and fires `StructureUpgradedEvent`.
   Fires `StructureClaimedEvent`.
 - `cancel`: refunds what the job spent while it is still running. A cancelled build leaves the holding. Any other job
   leaves the structure as it was.
@@ -150,7 +150,8 @@ takes a view down on `StructureRemovedEvent`.
 - A Build job raises the build layer by layer with its progress. Any other job leaves every layer standing.
 - A new stage or a claimed move takes the old build down and puts the new one up.
 - The label stands on the build's `label` point, or above the roof if it has none. Line one is the name. Line two is
-  what is happening and the time left, Ready, Disabled or Needs repair. It is empty when there is nothing to report.
+  what is happening and the time left, Ready, Disabled or Needs repair. A running repair or upgrade shows over Disabled
+  and Needs repair. The whole label is empty when there is nothing to report.
 - While Ready to claim, the structure blinks with a `ClaimFlash` and the label carries a hitbox. Clicking it claims.
 - Upgrade pieces stand on the finished build at each upgrade's `upgrade:<id>` point and come down before any of it.
 - A Not placed structure has nothing in the world.
@@ -172,7 +173,7 @@ Advancing, Disabled or being moved.
 Holding a blueprint opens a ghost of the build on the block above the one the player looks at, within 24 blocks.
 A move blueprint shows the structure's current stage. The ghost starts facing the player and each sneak turns it a
 quarter. `ConstructionChecks.problem` or `moveProblem` decides green or red, and the action bar shows the reason.
-Right-click builds or moves there and uses one blueprint up. A refusal keeps the blueprint and says why.
+Right-click builds or moves there and uses one blueprint up. A refusal keeps the blueprint and says why when it has a reason.
 
 ## Extending it
 
@@ -183,7 +184,8 @@ A new kind of site:
 2. Override `blocked` for the site's own gates, `jobRules` for holds and pace, `demolishRefund` for its share and
    `contents` for whatever else a structure holds.
 3. Register it with `ConstructionSites.register` under the site id.
-4. Bind `BuildZones` and `StructureViews.content()` to the site's worlds, and tag Mapper cuboids `build_zone`.
+4. Bind `BuildZones` and `StructureViews.content()` to the site's worlds, and name Mapper cuboids `build_zone`. The cuboid's
+   other markers become zone tags, which is how `requiredZoneTag` is met.
 
 A new structure:
 
@@ -208,4 +210,4 @@ Hand players a blueprint with `BlueprintSessions.blueprintFor` or `blueprintToMo
 - `StructureStorage` reads only loaded chunks and only container blocks. A missing block means nothing is written.
 - `canUse` gates upgrade pieces only. Who may open a structure's containers is the site's zone rules.
 - Demolish removes the structure before it drops contents, so a `StructureContents` sees the holding without it.
-- `ConstructionAction.ADVANCE` and `JobKind.ADVANCE` read `UPGRADE` from old records, and stage reads `version`.
+- `ConstructionAction.ADVANCE` and `JobKind.ADVANCE` read `UPGRADE` from old records, stage reads `version`, and a job's `targetStage` reads `targetVersion`.

@@ -53,7 +53,8 @@ time, so nothing that has to survive that lives in its blocks.
 ## Settlers
 
 `settler/` is the camp side of core's settler framework. Rosters, rolling, crews, wages, morale and bodies work as
-`core-settlers.md` describes. The numbers are in `configs/settlers.yml`.
+`core-settlers.md` describes. The numbers are in `configs/settlers.yml`, read by `SettlerConfig` (builder numbers, trades, the starter
+crew, working caps) and `RecruitConfig` (arrivals, the hiring board, milestones).
 
 - `CampSettlers`: the camp's `SettlerSite`. The roster, wage fund and recruiting state live on the `Camp` record.
   - Population follows the Great Hall's highest standing stage (`population.by-hall-stage`, 6, 12, 20). A camp with no
@@ -97,17 +98,19 @@ time, so nothing that has to survive that lives in its blocks.
   after Haggler through `CampCoins`. `DockArrivals` stands candidates in a ring around the `settler_arrival` point,
   and only members can open their card. Events are `SettlerBoatEvent` and `SettlerHiredEvent`.
 - `prosperity/`: `CampProsperity` is the sum of each settler's rarity value (`prosperity.values`), times 1 + average
-  morale / 200, times 1 + the best Chronicler. `factors` breaks it down. It is written to the `ProsperityStore`
+  morale / 200, times 1 + the best Chronicler. `factors` breaks it down as `ProsperityFactors`. It is written to the `ProsperityStore`
   (`DatabaseProsperityStore`, table `camp_prosperity`) every 10 minutes by the server holding the world, and deleted
   when the clan disbands. `ProsperityStanding` is a stored value with its daily snapshot. `ProsperityLeaderboard`
   ranks the top 10 from the store every 10 minutes, so unloaded camps rank too.
 - `menu/`: `SettlerCards` opens a settler's `SettlerCardMenu` (identity, profession and wage, morale, work, traits) and
   a candidate's `CandidateMenu` (Hire, Reject). Farmers are sent to and taken off the farm there. Builders open their
-  crew and are taken off it there. Dismiss needs a shift-click. `CrewMenus` opens `CrewJobsMenu` (every unfinished
-  job) and `CrewMenu` (the crew, free Builders to add, Workforce against threshold, speed), only inside the camp.
-  `SettlerItems` and `SettlerTags` are the shared items and tag glyphs. Every button checks the rank's action and
-  shows gray with the not-allowed line without it.
-- `command/`: `/settler list|grant|dismiss <clan>` for staff (admin by default). `grant` rolls through core's
+  crew, or the job list when they have none, and are taken off it once the job is finished or held. Dismiss needs a shift-click. `CrewMenus` opens `CrewJobsMenu` (every unfinished
+  job) and `CrewMenu` (the crew, free Builders to add, Workforce against threshold, speed, and "Needs N more Workforce", Paused or the time left), only inside the camp.
+  `SettlerItems` and `SettlerTags` are the shared items and tag glyphs. Action buttons check the rank's action and
+  add the not-allowed line without it. `CandidateMenu`, `CrewJobsMenu`, `CrewMenu` and
+  `SettlerCardMenu` are package-private.
+- `command/`: `SettlerCommand` with `/settler list <clan>`, `grant <clan> <rarity> [profession|none] [source] [detail]`
+  and `dismiss <clan> <id>` for staff (admin by default), helped by `SettlerCommands`. `grant` rolls through core's
   `SettlerGrants`. `dismiss` matches an id prefix and removes as a dismissal, even off a running job.
 
 Design and phased plan in Outline under **Engineering**.
