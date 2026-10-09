@@ -1,6 +1,6 @@
 # Core: mob AI
 
-Status: Approved · Last verified: 2026-10-08, 5f976d8fd
+Status: Approved · Last verified: 2026-10-08, 9276a60b9
 
 ## Purpose
 
@@ -93,7 +93,7 @@ A `SceneMob` gets its body in one of the two ways every `SceneObject` does.
 
 Each tick `SceneMob.tick` decides if the mob is active. It is inactive when the body is gone or dead, or while any
 model plays its `death` clip. Otherwise it is active while a player is within `activationRadius` (48 by default).
-That proximity check is sampled about once a second (every 21 ticks).
+That proximity check is sampled once every 20 ticks. A mob that was dead or playing its death clip wakes on the next tick it is alive, if the last check found a player in range.
 
 - First active tick: the runtime starts. The body's AI is switched on if it was off (and remembered), vanilla goals
   are removed again, and `FOLLOW_RANGE` is raised to `pathRange` (48 by default) so the pathfinder can plan long trips.
@@ -122,7 +122,7 @@ Each tick:
 1. Every running component whose `shouldContinue` is false stops. `shouldContinue` defaults to `canStart`.
 2. Each component not running, from highest to lowest priority, starts if `canStart` and every control it claims is
    free or held by a lower-priority component. Starting stops those holders first.
-3. Every running component ticks.
+3. Every running component ticks, highest priority first.
 
 A component never takes a control from one of equal or higher priority. Components that claim no controls never
 conflict. `stopAll` stops everything running. `replan` stops everything and calls each component's `replan`, so every
@@ -248,13 +248,10 @@ From outside, `replan()` makes a mob reconsider (settlers do it when an assignme
 
 - Priority is list position. `registerComponents` runs before Attend and orders are added on top, so a subclass can
   never outrank them.
-- Running components tick in no fixed order. Do not rely on one component's tick seeing another's change the same tick.
 - A chunk-managed mob loses its whole AI state on every chunk load: pending orders, threat, rest timers and home are
   reset. Home becomes wherever the body spawns.
-- `attend` and `orderTo` fail before the first `onInit`, since their components do not exist yet.
-- `stopAnimation` relies on ModelEngine's lerp-out from when the clip was played.
-- Retaliate forgets a stale attacker only when the entity is still loaded. An attacker that left the server stays in
-  the table until decay drops it.
+- `attend` and `orderTo` do nothing before the first `onInit`, since their components do not exist yet.
+- Stopping a held clip sets its lerp-out to 0.2 s first, through the playing clip, since ModelEngine's stop call takes no blend time.
+- Retaliate forgets an attacker it can no longer find, such as one that logged out, and drops it as the target.
 - `WanderComponent` without `rest` uses `moveTo`, which never searches again. Only `travelTo` trips recover from no
   path or a stuck body.
-- Setting `orderSpeed` after spawn does nothing until the next spawn, because the order component reads it in `onInit`.
