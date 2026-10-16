@@ -16,8 +16,9 @@ git clone https://github.com/BetterPvP/ai-tooling.git
 python ai-tooling/install.py <path to the BetterPvP checkout>
 ```
 
-This links everything into the checkout and keeps it out of the checkout's git. Run it again after pulling. Then make
-sure the checkout's `CLAUDE.md` imports the house rules with the line `@.claude/shared/house-rules.md`.
+This links everything into the checkout and keeps it out of the checkout's git. Run it again after pulling. A checkout
+without a `CLAUDE.md` gets a copy of `checkout-CLAUDE.md`. One with its own must import the house rules with the line
+`@.claude/shared/house-rules.md`.
 
 ## Layout
 
@@ -28,6 +29,7 @@ sure the checkout's `CLAUDE.md` imports the house rules with the line `@.claude/
 | `shared/` | `.claude/shared` | house rules, slop checklist, `project.json`, `deploy.py` |
 | `tools/<name>/` | `.claude/<name>` | scripts, plus an optional `settings.json` (Claude hooks) and `git-hooks/` |
 | `docs/` | `docs/` | the system docs |
+| `checkout-CLAUDE.md` | `CLAUDE.md` | the checkout's own instructions, copied when it has none |
 
 Edits made through the checkout land in this repo. Commit them here.
 

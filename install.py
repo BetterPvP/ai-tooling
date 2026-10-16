@@ -8,12 +8,14 @@
 - tools/<name>    -> <checkout>/.claude/<name>, its settings.json merged into .claude/settings.json and its git-hooks/
                      copied into the checkout's git hooks
 - docs/           -> <checkout>/docs
+- checkout-CLAUDE.md -> <checkout>/CLAUDE.md, copied when the checkout has none
 
 Every link is kept out of the checkout's git. A real folder already at a link's place is left alone and reported.
 """
 import json
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
 
@@ -101,6 +103,12 @@ def main():
             merge_settings(claude / "settings.json", tool.name, json.loads(fragment.read_text(encoding="utf-8")))
         for hook in sorted((tool / "git-hooks").glob("*")):
             install_git_hook(checkout, hook)
+    # A fresh clone, such as a cloud session's, has no CLAUDE.md of its own. A copy, so the
+    # checkout can still change its own.
+    if not (checkout / "CLAUDE.md").exists():
+        shutil.copyfile(REPO / "checkout-CLAUDE.md", checkout / "CLAUDE.md")
+        print("ok      CLAUDE.md")
+    excludes.append("/CLAUDE.md")
     exclude(checkout, excludes)
 
 
