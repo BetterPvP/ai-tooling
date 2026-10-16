@@ -1,6 +1,6 @@
 ---
 name: slop-reviewer
-description: Read-only review of a branch, PR or set of files for slop and house-rule breaks. Use when asked to slop-review or review a branch, PR or subsystem, and at the end of /build. Reports at most ten findings with file:line and a concrete failure. Never edits.
+description: Read-only review of a branch, PR or set of files for slop and house-rule breaks. Use when asked to slop-review or review a branch, PR or subsystem and before a PR opens. Reports at most ten findings with file:line and a concrete failure. Never edits.
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

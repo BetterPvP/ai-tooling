@@ -23,9 +23,9 @@ sure the checkout's `CLAUDE.md` imports the house rules with the line `@.claude/
 
 | Folder | Becomes | Holds |
 |---|---|---|
-| `skills/<name>/` | `.claude/skills/<name>` | `/slice`, `/build`, `/doc`, `/cleanup`, and the project skills |
-| `agents/` | `.claude/agents` | `slop-reviewer`, `implementer`, and the project agents |
-| `shared/` | `.claude/shared` | house rules, slop checklist, doc templates, `project.json`, `board.py`, `deploy.py` |
+| `skills/<name>/` | `.claude/skills/<name>` | `/cleanup`, `/gui` and the project skills |
+| `agents/` | `.claude/agents` | `slop-reviewer`, `convention-reviewer` and the project agents |
+| `shared/` | `.claude/shared` | house rules, slop checklist, `project.json`, `deploy.py` |
 | `tools/<name>/` | `.claude/<name>` | scripts, plus an optional `settings.json` (Claude hooks) and `git-hooks/` |
 | `docs/` | `docs/` | the system docs |
 
@@ -33,8 +33,8 @@ Edits made through the checkout land in this repo. Commit them here.
 
 ## Config
 
-`shared/project.json` sets the repo, the base branch (change `base` when the season branch changes), the PR size
-limit, the board and its status ids, and the projects to take new issues off.
+`shared/project.json` sets the repo, the base branch (change `base` when the season branch changes) and the PR size
+limit. Issues, cycles and planning live in Itsaplan (plan.brauw.dev).
 
 For deploys, set `PTERODACTYL_API_KEY`, or sign in to the 1Password CLI with access to
 `op://Claude/pterodactyl-betterpvp/credential`.

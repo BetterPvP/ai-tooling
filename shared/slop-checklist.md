@@ -1,6 +1,6 @@
 # Slop checklist
 
-Code that compiles but should not exist. Used by the slop-reviewer agent, `/build`, `/cleanup`, and in human review.
+Code that compiles but should not exist. Used by the slop-reviewer agent, `/cleanup`, and in human review.
 
 - Code nothing calls, or that only tests call
 - Interfaces, factories, registries or config keys nobody asked for
