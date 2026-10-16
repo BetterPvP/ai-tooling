@@ -27,7 +27,7 @@ def link(path, target):
     if path.exists() and path.resolve() == target:
         print(f"ok      {path}")
         return True
-    if path.is_symlink() or path.is_junction():
+    if path.is_symlink() or getattr(path, "is_junction", lambda: False)():
         path.unlink()
     elif path.exists():
         print(f"skipped {path}: a real folder is there. Move what it holds into {target}, delete it, run again.")
